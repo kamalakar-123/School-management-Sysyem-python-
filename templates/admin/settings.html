@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - School Management System</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    
+    <!-- SIDEBAR NAVIGATION -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-graduation-cap"></i>
+                <span>SchoolHub</span>
+            </div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a href="/dashboard" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/students" class="nav-item">
+                <i class="fas fa-user-graduate"></i>
+                <span>Students</span>
+            </a>
+            <a href="/teachers" class="nav-item">
+                <i class="fas fa-chalkboard-teacher"></i>
+                <span>Teachers</span>
+            </a>
+            <a href="/attendance" class="nav-item">
+                <i class="fas fa-clipboard-check"></i>
+                <span>Attendance</span>
+            </a>
+            <a href="/fees" class="nav-item">
+                <i class="fas fa-money-bill-wave"></i>
+                <span>Fees</span>
+            </a>
+            <a href="/exams" class="nav-item">
+                <i class="fas fa-book-open"></i>
+                <span>Exams</span>
+            </a>
+            <a href="/settings" class="nav-item active">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-info">
+                    <div class="user-name">Admin User</div>
+                    <div class="user-role">Administrator</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- MAIN CONTENT AREA -->
+    <div class="main-content">
+        
+        <!-- TOP HEADER BAR -->
+        <header class="header">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 class="page-title">System Settings</h1>
+            </div>
+            
+            <div class="header-right">
+                <div class="header-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search...">
+                </div>
+                
+                <button class="notification-btn" id="notificationBtn">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">0</span>
+                </button>
+                
+                <div class="date-display">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span id="currentDate"></span>
+                </div>
+            </div>
+        </header>
+        
+        <!-- SETTINGS SECTION -->
+        <section class="students-section">
+            <div class="table-container">
+                
+                <div class="table-header">
+                    <h3 class="table-title">
+                        <i class="fas fa-sliders-h"></i>
+                        <span>System Configuration</span>
+                    </h3>
+                </div>
+                
+                <div style="padding: 40px;">
+                    
+                    <!-- School Information -->
+                    <div style="background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h3 style="margin-bottom: 20px; color: #2d3748; display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-school"></i>
+                            School Information
+                        </h3>
+                        <div style="display: grid; gap: 20px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; color: #4a5568; font-weight: 500;">School Name</label>
+                                <input type="text" value="SchoolHub Management System" style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; color: #4a5568; font-weight: 500;">Email</label>
+                                <input type="email" value="admin@schoolhub.edu" style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; color: #4a5568; font-weight: 500;">Phone</label>
+                                <input type="tel" value="+1 (555) 123-4567" style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- System Preferences -->
+                    <div style="background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h3 style="margin-bottom: 20px; color: #2d3748; display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-cogs"></i>
+                            System Preferences
+                        </h3>
+                        <div style="display: grid; gap: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #e2e8f0;">
+                                <div>
+                                    <div style="font-weight: 500; color: #2d3748;">Email Notifications</div>
+                                    <div style="font-size: 14px; color: #718096;">Receive email alerts for important updates</div>
+                                </div>
+                                <label class="switch" style="position: relative; display: inline-block; width: 50px; height: 24px;">
+                                    <input type="checkbox" checked style="opacity: 0; width: 0; height: 0;">
+                                    <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #4299e1; transition: .4s; border-radius: 24px;"></span>
+                                </label>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #e2e8f0;">
+                                <div>
+                                    <div style="font-weight: 500; color: #2d3748;">Auto Backup</div>
+                                    <div style="font-size: 14px; color: #718096;">Automatically backup database daily</div>
+                                </div>
+                                <label class="switch" style="position: relative; display: inline-block; width: 50px; height: 24px;">
+                                    <input type="checkbox" checked style="opacity: 0; width: 0; height: 0;">
+                                    <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #4299e1; transition: .4s; border-radius: 24px;"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div style="display: flex; gap: 15px;">
+                        <button style="padding: 12px 24px; background: #4299e1; color: white; border: none; border-radius: 8px; font-weight: 500; cursor: pointer;">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                        <button style="padding: 12px 24px; background: #e53e3e; color: white; border: none; border-radius: 8px; font-weight: 500; cursor: pointer;">
+                            <i class="fas fa-redo"></i> Reset to Default
+                        </button>
+                    </div>
+                    
+                </div>
+                
+            </div>
+        </section>
+        
+        <footer class="footer">
+            <p>&copy; 2026 SchoolHub Management System. All rights reserved.</p>
+            <p class="footer-tech">Powered by Flask + SQLite + JavaScript | Real-Time Updates</p>
+        </footer>
+        
+    </div>
+    
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-icon">
+                <i class="fas fa-graduation-cap fa-3x"></i>
+            </div>
+            <h2>Loading Settings</h2>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/settings.js') }}"></script>
+    
+</body>
+</html>

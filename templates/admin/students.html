@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Students List - School Management System</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    
+    <!-- ============================================ -->
+    <!-- SIDEBAR NAVIGATION -->
+    <!-- ============================================ -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-graduation-cap"></i>
+                <span>SchoolHub</span>
+            </div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a href="/dashboard" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/students" class="nav-item active">
+                <i class="fas fa-user-graduate"></i>
+                <span>Students</span>
+            </a>
+            <a href="/teachers" class="nav-item">
+                <i class="fas fa-chalkboard-teacher"></i>
+                <span>Teachers</span>
+            </a>
+            <a href="/attendance" class="nav-item">
+                <i class="fas fa-clipboard-check"></i>
+                <span>Attendance</span>
+            </a>
+            <a href="/fees" class="nav-item">
+                <i class="fas fa-money-bill-wave"></i>
+                <span>Fees</span>
+            </a>
+            <a href="/exams" class="nav-item">
+                <i class="fas fa-book-open"></i>
+                <span>Exams</span>
+            </a>
+            <a href="/settings" class="nav-item">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-info">
+                    <div class="user-name">Admin User</div>
+                    <div class="user-role">Administrator</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ============================================ -->
+    <!-- MAIN CONTENT AREA -->
+    <!-- ============================================ -->
+    <div class="main-content">
+        
+        <!-- TOP HEADER BAR -->
+        <header class="header">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 class="page-title">Students Management</h1>
+            </div>
+            
+            <div class="header-right">
+                <div class="header-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search...">
+                </div>
+                
+                <button class="notification-btn" id="notificationBtn">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge" id="notificationBadge">0</span>
+                </button>
+                
+                <div class="date-display">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span id="currentDate"></span>
+                </div>
+            </div>
+        </header>
+        
+        <!-- ============================================ -->
+        <!-- STUDENTS CONTROL PANEL -->
+        <!-- ============================================ -->
+        <section class="control-panel">
+            <div class="control-container">
+                
+                <!-- Left Controls -->
+                <div class="control-left">
+                    <!-- Live Search Bar -->
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input 
+                            type="text" 
+                            id="searchInput" 
+                            placeholder="Search by name or roll number..."
+                            autocomplete="off"
+                        >
+                        <button class="clear-search" id="clearSearch" style="display: none;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Class Filter Dropdown -->
+                    <div class="filter-dropdown">
+                        <i class="fas fa-filter"></i>
+                        <select id="classFilter">
+                            <option value="all">All Classes</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Right Controls -->
+                <div class="control-right">
+                    <!-- Student Count Badge -->
+                    <div class="count-badge">
+                        <i class="fas fa-users"></i>
+                        <span>Total: <strong id="totalCount">0</strong></span>
+                    </div>
+                    
+                    <!-- Toggle View Button -->
+                    <button class="toggle-btn" id="toggleView" data-mode="all">
+                        <i class="fas fa-eye"></i>
+                        <span>Show Absent Students</span>
+                    </button>
+                    
+                    <!-- Refresh Button -->
+                    <button class="refresh-btn" id="refreshData">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+                
+            </div>
+        </section>
+        
+        <!-- ============================================ -->
+        <!-- STUDENTS TABLE SECTION -->
+        <!-- ============================================ -->
+        <section class="students-section">
+            <div class="table-container">
+                
+                <!-- Table Header -->
+                <div class="table-header">
+                    <h3 class="table-title">
+                        <i class="fas fa-list"></i>
+                        <span id="tableTitle">All Students</span>
+                    </h3>
+                    <div class="table-actions">
+                        <button class="action-btn" title="Export to Excel">
+                            <i class="fas fa-file-excel"></i>
+                        </button>
+                        <button class="action-btn" title="Print">
+                            <i class="fas fa-print"></i>
+                        </button>
+                        <button class="action-btn" id="addStudentBtn" title="Add Student">
+                            <i class="fas fa-user-plus"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Table Body -->
+                <div class="table-wrapper">
+                    <table class="students-table" id="studentsTable">
+                        <thead>
+                            <tr>
+                                <th>Roll Number</th>
+                                <th>Student Name</th>
+                                <th>Class</th>
+                                <th>Email</th>
+                                <th>Attendance Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentsTableBody">
+                            <!-- Loading State -->
+                            <tr class="loading-row">
+                                <td colspan="6">
+                                    <div class="loading-spinner">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                        <p>Loading students...</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Empty State (Hidden by default) -->
+                <div class="empty-state" id="emptyState" style="display: none;">
+                    <i class="fas fa-users-slash"></i>
+                    <h3>No Students Found</h3>
+                    <p>Try adjusting your filters or search query</p>
+                </div>
+                
+            </div>
+        </section>
+        
+        <!-- ============================================ -->
+        <!-- FOOTER -->
+        <!-- ============================================ -->
+        <footer class="footer">
+            <p>&copy; 2026 SchoolHub Management System. All rights reserved.</p>
+            <p class="footer-tech">Powered by Flask + SQLite + JavaScript | Real-Time Updates</p>
+        </footer>
+        
+    </div>
+    
+    <!-- ============================================ -->
+    <!-- LOADING OVERLAY (Initial Page Load) -->
+    <!-- ============================================ -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-icon">
+                <i class="fas fa-graduation-cap fa-3x"></i>
+            </div>
+            <h2>Loading Students</h2>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ============================================ -->
+    <!-- ADD STUDENT MODAL -->
+    <!-- ============================================ -->
+    <div class="modal" id="addStudentModal" style="display: none;">
+        <div class="modal-overlay" id="modalOverlay"></div>
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-user-plus"></i> Add New Student</h2>
+                <button class="modal-close" id="closeModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form id="addStudentForm">
+                <div class="modal-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="studentName"><i class="fas fa-user"></i> Student Name *</label>
+                            <input type="text" id="studentName" name="name" required placeholder="Enter full name">
+                        </div>
+                        <div class="form-group">
+                            <label for="studentRoll"><i class="fas fa-id-badge"></i> Roll Number *</label>
+                            <input type="text" id="studentRoll" name="roll" required placeholder="Enter roll number">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="studentClass"><i class="fas fa-graduation-cap"></i> Class *</label>
+                            <select id="studentClass" name="class" required>
+                                <option value="">Select Class</option>
+                                <option value="Class 1">Class 1</option>
+                                <option value="Class 2">Class 2</option>
+                                <option value="Class 3">Class 3</option>
+                                <option value="Class 4">Class 4</option>
+                                <option value="Class 5">Class 5</option>
+                                <option value="Class 6">Class 6</option>
+                                <option value="Class 7">Class 7</option>
+                                <option value="Class 8">Class 8</option>
+                                <option value="Class 9">Class 9</option>
+                                <option value="Class 10">Class 10</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="studentEmail"><i class="fas fa-envelope"></i> Email *</label>
+                            <input type="email" id="studentEmail" name="email" required placeholder="student@example.com">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="studentPhone"><i class="fas fa-phone"></i> Phone Number</label>
+                            <input type="tel" id="studentPhone" name="phone" placeholder="(123) 456-7890">
+                        </div>
+                        <div class="form-group">
+                            <label for="studentStatus"><i class="fas fa-check-circle"></i> Status *</label>
+                            <select id="studentStatus" name="status" required>
+                                <option value="present">Present</option>
+                                <option value="absent">Absent</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="studentAddress"><i class="fas fa-map-marker-alt"></i> Address</label>
+                        <textarea id="studentAddress" name="address" rows="3" placeholder="Enter full address"></textarea>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" id="cancelBtn">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save"></i> Add Student
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Custom JavaScript -->
+    <script src="{{ url_for('static', filename='js/students.js') }}"></script>
+    
+</body>
+</html>

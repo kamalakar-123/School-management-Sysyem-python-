@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Management - School Management System</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    
+    <!-- ============================================ -->
+    <!-- SIDEBAR NAVIGATION -->
+    <!-- ============================================ -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-graduation-cap"></i>
+                <span>SchoolHub</span>
+            </div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a href="/dashboard" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/students" class="nav-item">
+                <i class="fas fa-user-graduate"></i>
+                <span>Students</span>
+            </a>
+            <a href="/teachers" class="nav-item">
+                <i class="fas fa-chalkboard-teacher"></i>
+                <span>Teachers</span>
+            </a>
+            <a href="/attendance" class="nav-item active">
+                <i class="fas fa-clipboard-check"></i>
+                <span>Attendance</span>
+            </a>
+            <a href="/fees" class="nav-item">
+                <i class="fas fa-money-bill-wave"></i>
+                <span>Fees</span>
+            </a>
+            <a href="/exams" class="nav-item">
+                <i class="fas fa-book-open"></i>
+                <span>Exams</span>
+            </a>
+            <a href="/settings" class="nav-item">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-info">
+                    <div class="user-name">Admin User</div>
+                    <div class="user-role">Administrator</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ============================================ -->
+    <!-- MAIN CONTENT AREA -->
+    <!-- ============================================ -->
+    <div class="main-content">
+        
+        <!-- TOP HEADER BAR -->
+        <header class="header">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 class="page-title">Attendance Management</h1>
+            </div>
+            
+            <div class="header-right">
+                <div class="header-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search...">
+                </div>
+                
+                <button class="notification-btn" id="notificationBtn">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">0</span>
+                </button>
+                
+                <div class="date-display">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span id="currentDate"></span>
+                </div>
+            </div>
+        </header>
+        
+        <!-- ============================================ -->
+        <!-- ATTENDANCE OVERVIEW SECTION -->
+        <!-- ============================================ -->
+        <section class="stats-section">
+            <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));">
+                
+                <!-- Total Present -->
+                <div class="stat-card" id="presentCard" style="cursor: pointer; transition: transform 0.2s;" onclick="filterByStatus('present')" title="Click to view present students">
+                    <div class="stat-icon students">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-label">Present Today</h3>
+                        <div class="stat-value" id="presentCount">0</div>
+                    </div>
+                </div>
+                
+                <!-- Total Absent -->
+                <div class="stat-card" id="absentCard" style="cursor: pointer; transition: transform 0.2s;" onclick="filterByStatus('absent')" title="Click to view absent students">
+                    <div class="stat-icon fees">
+                        <i class="fas fa-user-times"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-label">Absent Today</h3>
+                        <div class="stat-value" id="absentCount">0</div>
+                    </div>
+                </div>
+                
+                <!-- Attendance Percentage -->
+                <div class="stat-card" id="rateCard" style="cursor: pointer; transition: transform 0.2s;" onclick="filterByStatus('all')" title="Click to view all students">
+                    <div class="stat-icon attendance">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-label">Attendance Rate</h3>
+                        <div class="stat-value" id="attendanceRate">0%</div>
+                    </div>
+                </div>
+                
+            </div>
+        </section>
+        
+        <!-- ============================================ -->
+        <!-- ATTENDANCE CHART SECTION -->
+        <!-- ============================================ -->
+        <section class="charts-section">
+            <div class="charts-grid">
+                
+                <!-- Chart: Weekly Attendance Trend -->
+                <div class="chart-card" style="grid-column: 1 / -1;">
+                    <div class="chart-header">
+                        <div>
+                            <h3 class="chart-title">Attendance Trend</h3>
+                            <p class="chart-subtitle">Analyze attendance patterns</p>
+                        </div>
+                        <div class="chart-actions">
+                            <button class="chart-btn">
+                                <i class="fas fa-download"></i>
+                            </button>
+                            <button class="chart-btn">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Graph Filter Controls -->
+                    <div class="chart-filters" style="padding: 15px 20px; border-bottom: 1px solid #e2e8f0; display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <i class="fas fa-filter" style="color: #718096;"></i>
+                            <span style="font-weight: 600; color: #2d3748; font-size: 14px;">Filter by:</span>
+                        </div>
+                        
+                        <!-- Class Filter -->
+                        <div class="filter-dropdown">
+                            <select id="chartClassFilter" style="padding: 8px 12px; border: 1px solid #cbd5e0; border-radius: 6px; background: white; font-size: 13px; color: #2d3748; cursor: pointer; min-width: 150px;">
+                                <option value="all">All Classes</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Month Filter -->
+                        <div class="filter-dropdown">
+                            <select id="chartMonthFilter" style="padding: 8px 12px; border: 1px solid #cbd5e0; border-radius: 6px; background: white; font-size: 13px; color: #2d3748; cursor: pointer; min-width: 150px;">
+                                <option value="current">Current Month</option>
+                                <option value="1">January</option>
+                                <option value="2">February</option>
+                                <option value="3">March</option>
+                                <option value="4">April</option>
+                                <option value="5">May</option>
+                                <option value="6">June</option>
+                                <option value="7">July</option>
+                                <option value="8">August</option>
+                                <option value="9">September</option>
+                                <option value="10">October</option>
+                                <option value="11">November</option>
+                                <option value="12">December</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Year Filter -->
+                        <div class="filter-dropdown">
+                            <select id="chartYearFilter" style="padding: 8px 12px; border: 1px solid #cbd5e0; border-radius: 6px; background: white; font-size: 13px; color: #2d3748; cursor: pointer; min-width: 120px;">
+                                <option value="current">Current Year</option>
+                                <option value="2026">2026</option>
+                                <option value="2025">2025</option>
+                                <option value="2024">2024</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Apply Button -->
+                        <button id="applyChartFilters" style="padding: 8px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                            <i class="fas fa-check"></i> Apply Filters
+                        </button>
+                        
+                        <!-- Reset Button -->
+                        <button id="resetChartFilters" style="padding: 8px 16px; background: #e2e8f0; color: #4a5568; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    </div>
+                    
+                    <div class="chart-body">
+                        <canvas id="attendanceChart"></canvas>
+                    </div>
+                </div>
+                
+            </div>
+        </section>
+        
+        <!-- ============================================ -->
+        <!-- ATTENDANCE REPORTS SECTION -->
+        <!-- ============================================ -->
+        <section class="reports-section" style="margin-top: 30px;">
+            <div class="chart-card">
+                
+                <!-- Report Header -->
+                <div class="report-header" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 20px; border-radius: 12px 12px 0 0; color: white;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h3 style="margin: 0; font-size: 22px; font-weight: 700;">
+                                <i class="fas fa-chart-bar"></i> Attendance Reports
+                            </h3>
+                            <p style="margin: 5px 0 0 0; font-size: 14px; opacity: 0.9;">View student attendance reports by date or month</p>
+                        </div>
+                        <button class="action-btn" id="toggleReportBtn" title="Hide Report" style="background: rgba(255, 255, 255, 0.2); color: white; border: none; padding: 10px 14px; border-radius: 8px; cursor: pointer;">
+                            <i class="fas fa-chevron-up"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Report Filters -->
+                <div class="report-filters" id="reportFilters" style="padding: 20px; background: #f8f9fa; border-bottom: 1px solid #e2e8f0; display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+                    
+                    <!-- Report Type -->
+                    <div style="flex: 1; min-width: 200px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #2d3748; font-size: 14px;">
+                            <i class="fas fa-list"></i> Report Type
+                        </label>
+                        <select id="reportType" style="width: 100%; padding: 12px 15px; border: 1px solid #cbd5e0; border-radius: 8px; background: white; font-size: 14px; color: #2d3748; cursor: pointer;">
+                            <option value="monthly">Monthly Report</option>
+                            <option value="weekly">Weekly Report</option>
+                            <option value="daily">Daily Report</option>
+                            <option value="custom">Custom Date Range</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Select Month -->
+                    <div style="flex: 1; min-width: 200px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #2d3748; font-size: 14px;">
+                            <i class="fas fa-calendar-alt"></i> Select Month
+                        </label>
+                        <input 
+                            type="month" 
+                            id="reportMonth" 
+                            style="width: 100%; padding: 12px 15px; border: 1px solid #cbd5e0; border-radius: 8px; background: white; font-size: 14px; color: #2d3748; cursor: pointer;"
+                            value=""
+                        >
+                    </div>
+                    
+                    <!-- Class Filter for Report -->
+                    <div style="flex: 1; min-width: 200px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #2d3748; font-size: 14px;">
+                            <i class="fas fa-filter"></i> Select Class
+                        </label>
+                        <select id="reportClassFilter" style="width: 100%; padding: 12px 15px; border: 1px solid #cbd5e0; border-radius: 8px; background: white; font-size: 14px; color: #2d3748; cursor: pointer;">
+                            <option value="all">All Classes</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Generate Report Button -->
+                    <button id="generateReport" style="padding: 12px 30px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);">
+                        <i class="fas fa-chart-line"></i> Generate Report
+                    </button>
+                    
+                </div>
+                
+                <!-- Report Statistics -->
+                <div class="report-stats" id="reportStats" style="display: none; padding: 20px; background: white;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px;">
+                        
+                        <!-- Total Present -->
+                        <div style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); padding: 20px; border-radius: 12px; color: white; box-shadow: 0 4px 15px rgba(17, 153, 142, 0.3);">
+                            <div style="font-size: 32px; font-weight: 700;" id="reportPresentCount">0</div>
+                            <div style="font-size: 14px; margin-top: 5px; opacity: 0.9;">Total Present</div>
+                        </div>
+                        
+                        <!-- Total Absent -->
+                        <div style="background: linear-gradient(135deg, #ff6a00 0%, #ee0979 100%); padding: 20px; border-radius: 12px; color: white; box-shadow: 0 4px 15px rgba(238, 9, 121, 0.3);">
+                            <div style="font-size: 32px; font-weight: 700;" id="reportAbsentCount">0</div>
+                            <div style="font-size: 14px; margin-top: 5px; opacity: 0.9;">Total Absent</div>
+                        </div>
+                        
+                        <!-- Total Days -->
+                        <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); padding: 20px; border-radius: 12px; color: white; box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);">
+                            <div style="font-size: 32px; font-weight: 700;" id="reportTotalDays">0</div>
+                            <div style="font-size: 14px; margin-top: 5px; opacity: 0.9;">Total Days</div>
+                        </div>
+                        
+                        <!-- Avg Attendance -->
+                        <div style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); padding: 20px; border-radius: 12px; color: white; box-shadow: 0 4px 15px rgba(250, 112, 154, 0.3);">
+                            <div style="font-size: 32px; font-weight: 700;" id="reportAvgAttendance">0%</div>
+                            <div style="font-size: 14px; margin-top: 5px; opacity: 0.9;">Avg Attendance</div>
+                        </div>
+                        
+                    </div>
+                    
+                    <!-- Report Period Info -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #f7fafc; border-radius: 8px; margin-bottom: 20px;">
+                        <div>
+                            <strong>Report Period:</strong> <span id="reportPeriod">-</span> | <strong>Total Days:</strong> <span id="reportDaysCount">0</span>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="action-btn" title="Export to Excel" style="padding: 8px 16px; background: #10b981; color: white; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;">
+                                <i class="fas fa-file-excel"></i> Export
+                            </button>
+                            <button class="action-btn" title="Print Report" style="padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;">
+                                <i class="fas fa-print"></i> Print
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Report Table -->
+                    <div class="table-wrapper">
+                        <table class="students-table">
+                            <thead>
+                                <tr>
+                                    <th>Roll No</th>
+                                    <th>Student Name</th>
+                                    <th>Class</th>
+                                    <th>Present</th>
+                                    <th>Absent</th>
+                                    <th>Attendance %</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reportTableBody">
+                                <tr>
+                                    <td colspan="6" style="text-align: center; padding: 40px; color: #718096;">
+                                        <i class="fas fa-info-circle" style="font-size: 48px; margin-bottom: 10px; opacity: 0.3;"></i>
+                                        <p style="font-size: 16px;">Click "Generate Report" to view attendance data</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                </div>
+                
+            </div>
+        </section>
+        
+        <!-- ============================================ -->
+        <!-- ATTENDANCE TABLE SECTION -->
+        <!-- ============================================ -->
+        <section class="students-section">
+            <div class="table-container">
+                
+                <!-- Table Header -->
+                <div class="table-header">
+                    <h3 class="table-title">
+                        <i class="fas fa-clipboard-list"></i>
+                        <span>Today's Attendance Records</span>
+                    </h3>
+                    <div class="table-actions" style="display: flex; gap: 10px; align-items: center;">
+                        <!-- Show/Hide Toggle Button -->
+                        <button class="action-btn" id="toggleTableBtn" title="Show Table">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        
+                        <button class="action-btn" title="Export">
+                            <i class="fas fa-file-excel"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Search and Filter Controls (Hidden Initially) -->
+                <div class="table-controls" id="tableControls" style="display: none; padding: 15px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-bottom: 1px solid #e2e8f0; flex-wrap: wrap; gap: 15px;">
+                    
+                    <!-- First Row: Search and Main Filters -->
+                    <div style="display: flex; gap: 15px; align-items: center; flex: 1; width: 100%; flex-wrap: wrap;">
+                        <!-- Search Box for Table -->
+                        <div class="search-box" style="margin: 0; flex: 1; min-width: 250px; max-width: 400px;">
+                            <i class="fas fa-search"></i>
+                            <input 
+                                type="text" 
+                                id="tableSearchInput" 
+                                placeholder="Search by name or roll number..."
+                                autocomplete="off"
+                                style="width: 100%;"
+                            >
+                            <button class="clear-search" id="clearTableSearch" style="display: none;">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Class Filter -->
+                        <div class="filter-dropdown" style="margin: 0;">
+                            <i class="fas fa-filter"></i>
+                            <select id="tableClassFilter" style="padding: 10px 35px 10px 15px; border: 1px solid #cbd5e0; border-radius: 8px; background: white; font-size: 14px; color: #2d3748; cursor: pointer; min-width: 150px;">
+                                <option value="all">All Classes</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Status Filter -->
+                        <div class="filter-dropdown" style="margin: 0;">
+                            <i class="fas fa-user-check"></i>
+                            <select id="tableStatusFilter" style="padding: 10px 35px 10px 15px; border: 1px solid #cbd5e0; border-radius: 8px; background: white; font-size: 14px; color: #2d3748; cursor: pointer; min-width: 150px;">
+                                <option value="all">All Status</option>
+                                <option value="present">Present Only</option>
+                                <option value="absent">Absent Only</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Date Filter -->
+                        <div class="filter-dropdown" style="margin: 0;">
+                            <i class="fas fa-calendar-day"></i>
+                            <input 
+                                type="date" 
+                                id="tableDateFilter" 
+                                style="padding: 10px 15px; border: 1px solid #cbd5e0; border-radius: 8px; background: white; font-size: 14px; color: #2d3748; cursor: pointer; min-width: 150px;"
+                                value=""
+                            >
+                        </div>
+                        
+                        <!-- Sort By Filter -->
+                        <div class="filter-dropdown" style="margin: 0;">
+                            <i class="fas fa-sort-amount-down"></i>
+                            <select id="tableSortFilter" style="padding: 10px 35px 10px 15px; border: 1px solid #cbd5e0; border-radius: 8px; background: white; font-size: 14px; color: #2d3748; cursor: pointer; min-width: 150px;">
+                                <option value="rollno">Sort by Roll No</option>
+                                <option value="name">Sort by Name</option>
+                                <option value="class">Sort by Class</option>
+                                <option value="status">Sort by Status</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Second Row: Count Badge and Actions -->
+                    <div style="display: flex; gap: 10px; align-items: center; margin-left: auto;">
+                        <!-- Record Count Badge -->
+                        <div class="count-badge" style="background: rgba(255, 255, 255, 0.2); padding: 8px 16px; border-radius: 8px; color: white; font-weight: 600; font-size: 14px;">
+                            <i class="fas fa-list-alt"></i>
+                            <span>Records: <strong id="tableRecordCount">0</strong></span>
+                        </div>
+                        
+                        <!-- Clear All Filters Button -->
+                        <button class="refresh-btn" id="clearAllFilters" title="Clear All Filters" style="background: rgba(255, 255, 255, 0.2); color: white; border: none; padding: 10px 14px; border-radius: 8px; cursor: pointer; transition: all 0.3s;">
+                            <i class="fas fa-eraser"></i>
+                        </button>
+                        
+                        <!-- Refresh Table Button -->
+                        <button class="refresh-btn" id="refreshTable" title="Refresh Data" style="background: rgba(255, 255, 255, 0.2); color: white; border: none; padding: 10px 14px; border-radius: 8px; cursor: pointer; transition: all 0.3s;">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    
+                </div>
+                
+                <!-- Table Body -->
+                <div class="table-wrapper" id="attendanceTableWrapper" style="display: none;">
+                    <table class="students-table">
+                        <thead>
+                            <tr>
+                                <th>Roll Number</th>
+                                <th>Student Name</th>
+                                <th>Class</th>
+                                <th>Status</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendanceTableBody">
+                            <tr class="loading-row">
+                                <td colspan="5">
+                                    <div class="loading-spinner">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                        <p>Loading attendance data...</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+            </div>
+        </section>
+        
+        <!-- FOOTER -->
+        <footer class="footer">
+            <p>&copy; 2026 SchoolHub Management System. All rights reserved.</p>
+            <p class="footer-tech">Powered by Flask + SQLite + JavaScript | Real-Time Updates</p>
+        </footer>
+        
+    </div>
+    
+    <!-- LOADING OVERLAY -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-icon">
+                <i class="fas fa-graduation-cap fa-3x"></i>
+            </div>
+            <h2>Loading Attendance</h2>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Custom JavaScript -->
+    <script src="{{ url_for('static', filename='js/attendance.js') }}"></script>
+    
+</body>
+</html>

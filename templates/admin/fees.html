@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fees Management - School Management System</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    
+    <!-- SIDEBAR NAVIGATION -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-graduation-cap"></i>
+                <span>SchoolHub</span>
+            </div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a href="/dashboard" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/students" class="nav-item">
+                <i class="fas fa-user-graduate"></i>
+                <span>Students</span>
+            </a>
+            <a href="/teachers" class="nav-item">
+                <i class="fas fa-chalkboard-teacher"></i>
+                <span>Teachers</span>
+            </a>
+            <a href="/attendance" class="nav-item">
+                <i class="fas fa-clipboard-check"></i>
+                <span>Attendance</span>
+            </a>
+            <a href="/fees" class="nav-item active">
+                <i class="fas fa-money-bill-wave"></i>
+                <span>Fees</span>
+            </a>
+            <a href="/exams" class="nav-item">
+                <i class="fas fa-book-open"></i>
+                <span>Exams</span>
+            </a>
+            <a href="/settings" class="nav-item">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-info">
+                    <div class="user-name">Admin User</div>
+                    <div class="user-role">Administrator</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- MAIN CONTENT AREA -->
+    <div class="main-content">
+        
+        <!-- TOP HEADER BAR -->
+        <header class="header">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 class="page-title">Fees Management</h1>
+            </div>
+            
+            <div class="header-right">
+                <div class="header-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search...">
+                </div>
+                
+                <button class="notification-btn" id="notificationBtn">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">0</span>
+                </button>
+                
+                <div class="date-display">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span id="currentDate"></span>
+                </div>
+            </div>
+        </header>
+        
+        <!-- FEES OVERVIEW -->
+        <section class="stats-section">
+            <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));">
+                
+                <div class="stat-card" id="collectedCard" style="cursor: pointer;" onclick="filterByStatus('paid')" title="Click to view fully paid students">
+                    <div class="stat-icon students">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-label">Total Collected</h3>
+                        <div class="stat-value" id="totalCollected">$0</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card" id="pendingCard" style="cursor: pointer;" onclick="filterByStatus('pending')" title="Click to view students with pending fees">
+                    <div class="stat-icon fees">
+                        <i class="fas fa-hourglass-half"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-label">Pending Amount</h3>
+                        <div class="stat-value" id="pendingAmount">$0</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card" id="overdueCard" style="cursor: pointer;" onclick="filterByStatus('all')" title="Click to view all students">
+                    <div class="stat-icon exams">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-label">Overdue Students</h3>
+                        <div class="stat-value" id="overdueCount">0</div>
+                    </div>
+                </div>
+                
+            </div>
+        </section>
+        
+        <!-- FEES CONTROL PANEL -->
+        <section class="control-panel">
+            <div class="control-container">
+                
+                <!-- Left Controls -->
+                <div class="control-left">
+                    <!-- Live Search Bar -->
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input 
+                            type="text" 
+                            id="searchInput" 
+                            placeholder="Search by student name..."
+                            autocomplete="off"
+                        >
+                        <button class="clear-search" id="clearSearch" style="display: none;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Class Filter Dropdown -->
+                    <div class="filter-dropdown">
+                        <i class="fas fa-filter"></i>
+                        <select id="classFilter">
+                            <option value="all">All Classes</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Right Controls -->
+                <div class="control-right">
+                    <!-- Student Count Badge -->
+                    <div class="count-badge">
+                        <i class="fas fa-users"></i>
+                        <span>Showing: <strong id="showingCount">0</strong></span>
+                    </div>
+                    
+                    <!-- Refresh Button -->
+                    <button class="refresh-btn" id="refreshData">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+                
+            </div>
+        </section>
+        
+        <!-- FEES TABLE -->
+        <section class="students-section">
+            <div class="table-container">
+                
+                <div class="table-header">
+                    <h3 class="table-title">
+                        <i class="fas fa-receipt"></i>
+                        <span>Fee Records</span>
+                    </h3>
+                    <div class="table-actions">
+                        <button class="action-btn" title="Add Payment">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <button class="action-btn" title="Export">
+                            <i class="fas fa-file-excel"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="table-wrapper">
+                    <table class="students-table">
+                        <thead>
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Class</th>
+                                <th>Total Amount</th>
+                                <th>Paid Amount</th>
+                                <th>Pending</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="feesTableBody">
+                            <tr class="loading-row">
+                                <td colspan="8">
+                                    <div class="loading-spinner">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                        <p>Loading fees data...</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+            </div>
+        </section>
+        
+        <footer class="footer">
+            <p>&copy; 2026 SchoolHub Management System. All rights reserved.</p>
+            <p class="footer-tech">Powered by Flask + SQLite + JavaScript | Real-Time Updates</p>
+        </footer>
+        
+    </div>
+    
+    <!-- PAYMENT MODAL -->
+    <div class="modal" id="paymentModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5);">
+        <div class="modal-content" style="background-color: #fefefe; margin: 10% auto; padding: 0; border-radius: 12px; width: 90%; max-width: 500px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+            <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px 25px; border-radius: 12px 12px 0 0; display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="color: white; margin: 0; font-size: 20px; font-weight: 600;">
+                    <i class="fas fa-money-bill-wave"></i> Record Payment
+                </h2>
+                <button class="modal-close" id="closePaymentModal" style="background: transparent; border: none; color: white; font-size: 24px; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: background 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='transparent'">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div style="padding: 25px;">
+                <!-- Student Info -->
+                <div style="background: #f7fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span style="color: #4a5568; font-size: 14px;">Student Name:</span>
+                        <strong id="paymentStudentName" style="color: #2d3748;">-</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span style="color: #4a5568; font-size: 14px;">Class:</span>
+                        <strong id="paymentStudentClass" style="color: #2d3748;">-</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span style="color: #4a5568; font-size: 14px;">Total Amount:</span>
+                        <strong id="paymentTotalAmount" style="color: #2d3748;">$0</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span style="color: #4a5568; font-size: 14px;">Already Paid:</span>
+                        <strong id="paymentAlreadyPaid" style="color: #48bb78;">$0</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; border-top: 2px solid #e2e8f0; padding-top: 10px; margin-top: 10px;">
+                        <span style="color: #4a5568; font-size: 14px; font-weight: 600;">Pending Amount:</span>
+                        <strong id="paymentPending" style="color: #f56565; font-size: 18px;">$0</strong>
+                    </div>
+                </div>
+                
+                <!-- Payment Form -->
+                <form id="paymentForm">
+                    <input type="hidden" id="paymentFeeId">
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #2d3748; font-size: 14px;">
+                            <i class="fas fa-dollar-sign"></i> Payment Amount
+                        </label>
+                        <input 
+                            type="number" 
+                            id="paymentAmount" 
+                            step="0.01" 
+                            min="0.01" 
+                            placeholder="Enter amount" 
+                            required
+                            style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 16px; font-weight: 600;"
+                        >
+                        <div id="paymentError" style="color: #f56565; font-size: 13px; margin-top: 5px; display: none;"></div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #2d3748; font-size: 14px;">
+                            <i class="fas fa-calendar-alt"></i> Payment Date
+                        </label>
+                        <input 
+                            type="date" 
+                            id="paymentDate" 
+                            required
+                            style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px;"
+                        >
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                        <button type="button" id="cancelPaymentBtn" style="background: #e2e8f0; color: #4a5568; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s;" onmouseover="this.style.background='#cbd5e0'" onmouseout="this.style.background='#e2e8f0'">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                        <button type="submit" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 6px rgba(102, 126, 234, 0.4);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(102, 126, 234, 0.5)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(102, 126, 234, 0.4)'">
+                            <i class="fas fa-check"></i> Record Payment
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-icon">
+                <i class="fas fa-graduation-cap fa-3x"></i>
+            </div>
+            <h2>Loading Fees</h2>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/fees.js') }}"></script>
+    
+</body>
+</html>

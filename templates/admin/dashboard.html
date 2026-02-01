@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Management Dashboard - Automated Insights</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    
+    <!-- ============================================ -->
+    <!-- SIDEBAR NAVIGATION -->
+    <!-- ============================================ -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-graduation-cap"></i>
+                <span>SchoolHub</span>
+            </div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a href="/dashboard" class="nav-item active">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/students" class="nav-item">
+                <i class="fas fa-user-graduate"></i>
+                <span>Students</span>
+            </a>
+            <a href="/teachers" class="nav-item">
+                <i class="fas fa-chalkboard-teacher"></i>
+                <span>Teachers</span>
+            </a>
+            <a href="/attendance" class="nav-item">
+                <i class="fas fa-clipboard-check"></i>
+                <span>Attendance</span>
+            </a>
+            <a href="/fees" class="nav-item">
+                <i class="fas fa-money-bill-wave"></i>
+                <span>Fees</span>
+            </a>
+            <a href="/exams" class="nav-item">
+                <i class="fas fa-book-open"></i>
+                <span>Exams</span>
+            </a>
+            <a href="/settings" class="nav-item">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-info">
+                    <div class="user-name">Admin User</div>
+                    <div class="user-role">Administrator</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ============================================ -->
+    <!-- MAIN CONTENT AREA -->
+    <!-- ============================================ -->
+    <div class="main-content">
+        
+        <!-- TOP HEADER BAR -->
+        <header class="header">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 class="page-title">Dashboard Overview</h1>
+            </div>
+            
+            <div class="header-right">
+                <div class="header-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search...">
+                </div>
+                
+                <button class="notification-btn" id="notificationBtn">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge" id="notificationBadge">0</span>
+                </button>
+                
+                <div class="date-display">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span id="currentDate"></span>
+                </div>
+            </div>
+        </header>
+        
+        <!-- ============================================ -->
+        <!-- STATISTICS CARDS SECTION -->
+        <!-- ============================================ -->
+        <section class="stats-section">
+            <div class="stats-grid">
+                
+                <!-- Card 1: Total Students -->
+                <div class="stat-card" data-aos="fade-up" data-aos-delay="0" onclick="window.location.href='/students'" style="cursor: pointer;">
+                    <div class="stat-icon students">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-label">Total Students</h3>
+                        <div class="stat-value" data-target="0" id="totalStudents">0</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>+5% from last month</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Card 2: Total Teachers -->
+                <div class="stat-card" data-aos="fade-up" data-aos-delay="100" onclick="window.location.href='/teachers'" style="cursor: pointer;">
+                    <div class="stat-icon teachers">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-label">Total Teachers</h3>
+                        <div class="stat-value" data-target="0" id="totalTeachers">0</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>+2 new this month</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Card 3: Today's Attendance -->
+                <div class="stat-card" data-aos="fade-up" data-aos-delay="200" onclick="window.location.href='/attendance'" style="cursor: pointer;">
+                    <div class="stat-icon attendance" id="attendanceIcon">
+                        <i class="fas fa-clipboard-check"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-label">Today's Attendance</h3>
+                        <div class="stat-value" data-target="0" id="attendancePercentage">0%</div>
+                        <div class="stat-change" id="attendanceChange">
+                            <i class="fas fa-minus"></i>
+                            <span>Calculating...</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Card 4: Pending Fees -->
+                <div class="stat-card" data-aos="fade-up" data-aos-delay="300" onclick="window.location.href='/fees'" style="cursor: pointer;">
+                    <div class="stat-icon fees" id="feesIcon">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-label">Pending Fees</h3>
+                        <div class="stat-value" data-target="0" id="pendingFees">0</div>
+                        <div class="stat-change" id="feesChange">
+                            <i class="fas fa-minus"></i>
+                            <span>Students with dues</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Card 5: Upcoming Exams -->
+                <div class="stat-card" data-aos="fade-up" data-aos-delay="400" onclick="window.location.href='/exams'" style="cursor: pointer;">
+                    <div class="stat-icon exams">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-label">Upcoming Exams</h3>
+                        <div class="stat-value" data-target="0" id="upcomingExams">0</div>
+                        <div class="stat-change neutral">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Next 7 days</span>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </section>
+        
+        <!-- ============================================ -->
+        <!-- CHARTS SECTION -->
+        <!-- ============================================ -->
+        <section class="charts-section">
+            <div class="charts-grid">
+                
+                <!-- Chart 1: Daily Attendance Pattern -->
+                <div class="chart-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="chart-header">
+                        <div>
+                            <h3 class="chart-title">Daily Attendance Pattern</h3>
+                            <p class="chart-subtitle">Last 7 days trend analysis</p>
+                        </div>
+                        <div class="chart-actions">
+                            <button class="chart-btn">
+                                <i class="fas fa-download"></i>
+                            </button>
+                            <button class="chart-btn">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="attendanceChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Chart 2: Class-Wise Performance -->
+                <div class="chart-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="chart-header">
+                        <div>
+                            <h3 class="chart-title">Class-Wise Performance</h3>
+                            <p class="chart-subtitle">Average performance by class</p>
+                        </div>
+                        <div class="chart-actions">
+                            <button class="chart-btn">
+                                <i class="fas fa-download"></i>
+                            </button>
+                            <button class="chart-btn">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+                
+            </div>
+        </section>
+        
+        <!-- ============================================ -->
+        <!-- SMART ALERTS SECTION -->
+        <!-- ============================================ -->
+        <section class="alerts-section">
+            <div class="alerts-container">
+                <div class="alerts-header">
+                    <h3 class="alerts-title">
+                        <i class="fas fa-bell"></i>
+                        Smart Alerts & Insights
+                    </h3>
+                    <button class="refresh-btn" id="refreshAlerts">
+                        <i class="fas fa-sync-alt"></i>
+                        Refresh
+                    </button>
+                </div>
+                
+                <div class="alerts-body" id="alertsContainer">
+                    <!-- Alerts will be dynamically loaded here -->
+                    <div class="loading-spinner">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Loading alerts...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- ============================================ -->
+        <!-- FOOTER -->
+        <!-- ============================================ -->
+        <footer class="footer">
+            <p>&copy; 2026 SchoolHub Management System. All rights reserved.</p>
+            <p class="footer-tech">Powered by Flask + SQLite + Chart.js | AI-Driven Insights</p>
+        </footer>
+        
+    </div>
+    
+    <!-- ============================================ -->
+    <!-- LOADING OVERLAY (Initial Page Load) -->
+    <!-- ============================================ -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-icon">
+                <i class="fas fa-graduation-cap fa-3x"></i>
+            </div>
+            <h2>Loading Dashboard</h2>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Custom JavaScript -->
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    
+</body>
+</html>
