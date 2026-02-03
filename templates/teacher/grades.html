@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grades - Teacher Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/teacher/grades.css') }}">
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <i class="fas fa-graduation-cap"></i>
+            <h2>Teacher Portal</h2>
+        </div>
+        <nav class="nav-menu">
+            <a href="/teacher/dashboard" class="nav-item">
+                <i class="fas fa-th-large"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/teacher/classes" class="nav-item">
+                <i class="fas fa-chalkboard-teacher"></i>
+                <span>My Classes</span>
+            </a>
+            <a href="/teacher/attendance" class="nav-item">
+                <i class="fas fa-user-check"></i>
+                <span>Attendance</span>
+            </a>
+            <a href="/teacher/assignments" class="nav-item">
+                <i class="fas fa-clipboard-list"></i>
+                <span>Assignments</span>
+            </a>
+            <a href="/teacher/grades" class="nav-item active">
+                <i class="fas fa-chart-line"></i>
+                <span>Grades</span>
+            </a>
+            <a href="/teacher/messages" class="nav-item">
+                <i class="fas fa-envelope"></i>
+                <span>Messages</span>
+            </a>
+            <a href="/teacher/settings" class="nav-item">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="/teacher/login" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <h1><i class="fas fa-chart-line"></i> Grade Management</h1>
+            <button class="btn btn-primary" id="exportGradesBtn">
+                <i class="fas fa-download"></i> Export Grades
+            </button>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="tabs">
+            <div class="tab-item active" data-tab="enter">
+                <i class="fas fa-edit"></i> Enter Grades
+            </div>
+            <div class="tab-item" data-tab="view">
+                <i class="fas fa-table"></i> View Grades
+            </div>
+            <div class="tab-item" data-tab="analytics">
+                <i class="fas fa-chart-bar"></i> Analytics
+            </div>
+        </div>
+
+        <!-- Tab Content Wrapper -->
+        <div class="tab-content-wrapper">
+            <!-- Enter Grades Tab -->
+            <div class="tab-content active" id="enterTab">
+                <div class="filters">
+                    <div class="filter-group">
+                        <label for="enterClassFilter">Class *</label>
+                        <select id="enterClassFilter" class="form-control" required>
+                            <option value="">Select Class</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="enterSectionFilter">Section</label>
+                        <select id="enterSectionFilter" class="form-control">
+                            <option value="">All Sections</option>
+                            <option value="A">Section A</option>
+                            <option value="B">Section B</option>
+                            <option value="C">Section C</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="enterSubjectFilter">Subject *</label>
+                        <select id="enterSubjectFilter" class="form-control" required>
+                            <option value="">Select Subject</option>
+                            <option value="Mathematics">Mathematics</option>
+                            <option value="Science">Science</option>
+                            <option value="English">English</option>
+                            <option value="Social Studies">Social Studies</option>
+                            <option value="Computer Science">Computer Science</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="enterExamType">Exam Type *</label>
+                        <select id="enterExamType" class="form-control" required>
+                            <option value="">Select Exam Type</option>
+                            <option value="Unit Test 1">Unit Test 1</option>
+                            <option value="Unit Test 2">Unit Test 2</option>
+                            <option value="Mid Term">Mid Term</option>
+                            <option value="Final Exam">Final Exam</option>
+                            <option value="Assignment">Assignment</option>
+                            <option value="Quiz">Quiz</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="enterMaxMarks">Max Marks *</label>
+                        <input type="number" id="enterMaxMarks" class="form-control" min="1" required>
+                    </div>
+                    <button class="btn btn-primary" id="loadStudentsBtn">
+                        <i class="fas fa-search"></i> Load Students
+                    </button>
+                </div>
+
+                <div class="grades-table-container">
+                    <table class="grades-table">
+                        <thead>
+                            <tr>
+                                <th>Roll No.</th>
+                                <th>Student Name</th>
+                                <th>Marks Obtained</th>
+                                <th>Grade</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gradesTableBody">
+                            <tr>
+                                <td colspan="5" class="empty-state">
+                                    <i class="fas fa-info-circle"></i>
+                                    Select class, subject, and exam type to load students
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="actions" id="saveGradesActions" style="display: none;">
+                    <button class="btn btn-secondary" id="resetGradesBtn">
+                        <i class="fas fa-undo"></i> Reset
+                    </button>
+                    <button class="btn btn-primary" id="saveGradesBtn">
+                        <i class="fas fa-save"></i> Save Grades
+                    </button>
+                </div>
+            </div>
+
+            <!-- View Grades Tab -->
+            <div class="tab-content" id="viewTab">
+                <div class="filters">
+                    <div class="filter-group">
+                        <label for="viewClassFilter">Class</label>
+                        <select id="viewClassFilter" class="form-control">
+                            <option value="">All Classes</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="viewSectionFilter">Section</label>
+                        <select id="viewSectionFilter" class="form-control">
+                            <option value="">All Sections</option>
+                            <option value="A">Section A</option>
+                            <option value="B">Section B</option>
+                            <option value="C">Section C</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="viewSubjectFilter">Subject</label>
+                        <select id="viewSubjectFilter" class="form-control">
+                            <option value="">All Subjects</option>
+                            <option value="Mathematics">Mathematics</option>
+                            <option value="Science">Science</option>
+                            <option value="English">English</option>
+                            <option value="Social Studies">Social Studies</option>
+                            <option value="Computer Science">Computer Science</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="viewExamType">Exam Type</label>
+                        <select id="viewExamType" class="form-control">
+                            <option value="">All Exams</option>
+                            <option value="Unit Test 1">Unit Test 1</option>
+                            <option value="Unit Test 2">Unit Test 2</option>
+                            <option value="Mid Term">Mid Term</option>
+                            <option value="Final Exam">Final Exam</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" id="searchGradesBtn">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </div>
+
+                <div class="grades-table-container">
+                    <table class="grades-table">
+                        <thead>
+                            <tr>
+                                <th>Roll No.</th>
+                                <th>Student Name</th>
+                                <th>Class</th>
+                                <th>Subject</th>
+                                <th>Exam Type</th>
+                                <th>Marks</th>
+                                <th>Grade</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="viewGradesTableBody">
+                            <tr>
+                                <td colspan="8" class="empty-state">
+                                    <i class="fas fa-info-circle"></i>
+                                    Use filters to search for grades
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Analytics Tab -->
+            <div class="tab-content" id="analyticsTab">
+                <div class="filters">
+                    <div class="filter-group">
+                        <label for="analyticsClassFilter">Class</label>
+                        <select id="analyticsClassFilter" class="form-control">
+                            <option value="">Select Class</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="analyticsSubjectFilter">Subject</label>
+                        <select id="analyticsSubjectFilter" class="form-control">
+                            <option value="">Select Subject</option>
+                            <option value="Mathematics">Mathematics</option>
+                            <option value="Science">Science</option>
+                            <option value="English">English</option>
+                            <option value="Social Studies">Social Studies</option>
+                            <option value="Computer Science">Computer Science</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="analyticsExamType">Exam Type</label>
+                        <select id="analyticsExamType" class="form-control">
+                            <option value="">Select Exam Type</option>
+                            <option value="Unit Test 1">Unit Test 1</option>
+                            <option value="Unit Test 2">Unit Test 2</option>
+                            <option value="Mid Term">Mid Term</option>
+                            <option value="Final Exam">Final Exam</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" id="generateAnalyticsBtn">
+                        <i class="fas fa-chart-bar"></i> Generate Analytics
+                    </button>
+                </div>
+
+                <div class="analytics-grid" id="analyticsGrid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h3 id="totalStudentsCount">0</h3>
+                            <p>Total Students</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-calculator"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h3 id="averageMarks">0%</h3>
+                            <p>Average Marks</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h3 id="highestMarks">0</h3>
+                            <p>Highest Marks</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h3 id="lowestMarks">0</h3>
+                            <p>Lowest Marks</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grade-distribution" id="gradeDistribution">
+                    <h3>Grade Distribution</h3>
+                    <div class="distribution-bars">
+                        <div class="distribution-item">
+                            <span class="grade-label">A+ (90-100)</span>
+                            <div class="progress-bar">
+                                <div class="progress" id="gradeAPlus" style="width: 0%"></div>
+                            </div>
+                            <span class="count" id="countAPlus">0</span>
+                        </div>
+                        <div class="distribution-item">
+                            <span class="grade-label">A (80-89)</span>
+                            <div class="progress-bar">
+                                <div class="progress" id="gradeA" style="width: 0%"></div>
+                            </div>
+                            <span class="count" id="countA">0</span>
+                        </div>
+                        <div class="distribution-item">
+                            <span class="grade-label">B+ (70-79)</span>
+                            <div class="progress-bar">
+                                <div class="progress" id="gradeBPlus" style="width: 0%"></div>
+                            </div>
+                            <span class="count" id="countBPlus">0</span>
+                        </div>
+                        <div class="distribution-item">
+                            <span class="grade-label">B (60-69)</span>
+                            <div class="progress-bar">
+                                <div class="progress" id="gradeB" style="width: 0%"></div>
+                            </div>
+                            <span class="count" id="countB">0</span>
+                        </div>
+                        <div class="distribution-item">
+                            <span class="grade-label">C (50-59)</span>
+                            <div class="progress-bar">
+                                <div class="progress" id="gradeC" style="width: 0%"></div>
+                            </div>
+                            <span class="count" id="countC">0</span>
+                        </div>
+                        <div class="distribution-item">
+                            <span class="grade-label">F (<50)</span>
+                            <div class="progress-bar">
+                                <div class="progress" id="gradeF" style="width: 0%"></div>
+                            </div>
+                            <span class="count" id="countF">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/grades.js') }}"></script>
+</body>
+</html>

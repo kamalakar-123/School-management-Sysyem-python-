@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages - Teacher Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/teacher/messages.css') }}">
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <i class="fas fa-graduation-cap"></i>
+            <h2>Teacher Portal</h2>
+        </div>
+        <nav class="nav-menu">
+            <a href="/teacher/dashboard" class="nav-item">
+                <i class="fas fa-th-large"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/teacher/classes" class="nav-item">
+                <i class="fas fa-chalkboard-teacher"></i>
+                <span>My Classes</span>
+            </a>
+            <a href="/teacher/attendance" class="nav-item">
+                <i class="fas fa-user-check"></i>
+                <span>Attendance</span>
+            </a>
+            <a href="/teacher/assignments" class="nav-item">
+                <i class="fas fa-clipboard-list"></i>
+                <span>Assignments</span>
+            </a>
+            <a href="/teacher/grades" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Grades</span>
+            </a>
+            <a href="/teacher/messages" class="nav-item active">
+                <i class="fas fa-envelope"></i>
+                <span>Messages</span>
+            </a>
+            <a href="/teacher/settings" class="nav-item">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="/teacher/login" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <h1><i class="fas fa-envelope"></i> Messages</h1>
+            <button class="btn btn-primary" id="composeMessageBtn">
+                <i class="fas fa-pen"></i> Compose Message
+            </button>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="tabs">
+            <div class="tab-item active" data-tab="inbox">
+                <i class="fas fa-inbox"></i> Inbox
+                <span class="badge" id="inboxBadge">0</span>
+            </div>
+            <div class="tab-item" data-tab="sent">
+                <i class="fas fa-paper-plane"></i> Sent
+            </div>
+            <div class="tab-item" data-tab="drafts">
+                <i class="fas fa-file-alt"></i> Drafts
+            </div>
+        </div>
+
+        <!-- Tab Content Wrapper -->
+        <div class="tab-content-wrapper">
+            <!-- Inbox Tab -->
+            <div class="tab-content active" id="inboxTab">
+                <div class="filters">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="inboxSearchInput" class="form-control" placeholder="Search messages...">
+                    </div>
+                    <div class="filter-group">
+                        <label for="inboxFilterType">Filter</label>
+                        <select id="inboxFilterType" class="form-control">
+                            <option value="all">All Messages</option>
+                            <option value="unread">Unread</option>
+                            <option value="read">Read</option>
+                            <option value="student">From Students</option>
+                            <option value="parent">From Parents</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="messages-list" id="inboxMessagesList">
+                    <!-- Messages will be loaded here dynamically -->
+                </div>
+            </div>
+
+            <!-- Sent Tab -->
+            <div class="tab-content" id="sentTab">
+                <div class="filters">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="sentSearchInput" class="form-control" placeholder="Search sent messages...">
+                    </div>
+                    <div class="filter-group">
+                        <label for="sentFilterType">Filter</label>
+                        <select id="sentFilterType" class="form-control">
+                            <option value="all">All Messages</option>
+                            <option value="student">To Students</option>
+                            <option value="parent">To Parents</option>
+                            <option value="class">To Class</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="messages-list" id="sentMessagesList">
+                    <!-- Sent messages will be loaded here dynamically -->
+                </div>
+            </div>
+
+            <!-- Drafts Tab -->
+            <div class="tab-content" id="draftsTab">
+                <div class="filters">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="draftsSearchInput" class="form-control" placeholder="Search drafts...">
+                    </div>
+                </div>
+
+                <div class="messages-list" id="draftsMessagesList">
+                    <!-- Drafts will be loaded here dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Compose Message Modal -->
+    <div id="composeMessageModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-pen"></i> Compose Message</h2>
+                <span class="close">&times;</span>
+            </div>
+            <form id="composeMessageForm">
+                <div class="form-group">
+                    <label for="messageRecipientType">Recipient Type *</label>
+                    <select id="messageRecipientType" class="form-control" required>
+                        <option value="">Select Recipient Type</option>
+                        <option value="student">Student</option>
+                        <option value="parent">Parent</option>
+                        <option value="class">Entire Class</option>
+                    </select>
+                </div>
+                <div class="form-group" id="studentSelectGroup" style="display: none;">
+                    <label for="messageStudent">Select Student *</label>
+                    <select id="messageStudent" class="form-control">
+                        <option value="">Select Student</option>
+                    </select>
+                </div>
+                <div class="form-group" id="classSelectGroup" style="display: none;">
+                    <label for="messageClass">Select Class *</label>
+                    <select id="messageClass" class="form-control">
+                        <option value="">Select Class</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="messageSubject">Subject *</label>
+                    <input type="text" id="messageSubject" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="messageBody">Message *</label>
+                    <textarea id="messageBody" class="form-control" rows="6" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Priority</label>
+                    <div class="priority-options">
+                        <label class="radio-label">
+                            <input type="radio" name="priority" value="low" checked>
+                            <span>Low</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="priority" value="normal">
+                            <span>Normal</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="priority" value="high">
+                            <span>High</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="saveDraftBtn">
+                        <i class="fas fa-save"></i> Save as Draft
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="cancelComposeBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> Send Message
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- View Message Modal -->
+    <div id="viewMessageModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-envelope-open"></i> Message Details</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="message-details">
+                <div class="message-meta">
+                    <div class="meta-item">
+                        <strong>From:</strong>
+                        <span id="viewMessageFrom"></span>
+                    </div>
+                    <div class="meta-item">
+                        <strong>To:</strong>
+                        <span id="viewMessageTo"></span>
+                    </div>
+                    <div class="meta-item">
+                        <strong>Date:</strong>
+                        <span id="viewMessageDate"></span>
+                    </div>
+                    <div class="meta-item">
+                        <strong>Subject:</strong>
+                        <span id="viewMessageSubject"></span>
+                    </div>
+                </div>
+                <div class="message-body">
+                    <p id="viewMessageBody"></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="closeViewBtn">Close</button>
+                <button type="button" class="btn btn-primary" id="replyMessageBtn">
+                    <i class="fas fa-reply"></i> Reply
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/messages.js') }}"></script>
+</body>
+</html>

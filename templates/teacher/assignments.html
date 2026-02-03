@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assignments - Teacher Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/teacher/assignments.css') }}">
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <i class="fas fa-graduation-cap"></i>
+            <h2>Teacher Portal</h2>
+        </div>
+        <nav class="nav-menu">
+            <a href="/teacher/dashboard" class="nav-item">
+                <i class="fas fa-th-large"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/teacher/classes" class="nav-item">
+                <i class="fas fa-chalkboard-teacher"></i>
+                <span>My Classes</span>
+            </a>
+            <a href="/teacher/attendance" class="nav-item">
+                <i class="fas fa-user-check"></i>
+                <span>Attendance</span>
+            </a>
+            <a href="/teacher/assignments" class="nav-item active">
+                <i class="fas fa-clipboard-list"></i>
+                <span>Assignments</span>
+            </a>
+            <a href="/teacher/grades" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Grades</span>
+            </a>
+            <a href="/teacher/messages" class="nav-item">
+                <i class="fas fa-envelope"></i>
+                <span>Messages</span>
+            </a>
+            <a href="/teacher/settings" class="nav-item">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="/teacher/login" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <h1><i class="fas fa-clipboard-list"></i> Assignments Management</h1>
+            <button class="btn btn-primary" id="createAssignmentBtn">
+                <i class="fas fa-plus"></i> Create Assignment
+            </button>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="tabs">
+            <div class="tab-item active" data-tab="active">
+                <i class="fas fa-tasks"></i> Active Assignments
+            </div>
+            <div class="tab-item" data-tab="past">
+                <i class="fas fa-history"></i> Past Assignments
+            </div>
+            <div class="tab-item" data-tab="submissions">
+                <i class="fas fa-inbox"></i> Submissions
+            </div>
+        </div>
+
+        <!-- Tab Content Wrapper -->
+        <div class="tab-content-wrapper">
+            <!-- Active Assignments Tab -->
+            <div class="tab-content active" id="activeTab">
+                <div class="filters">
+                    <div class="filter-group">
+                        <label for="activeClassFilter">Class</label>
+                        <select id="activeClassFilter" class="form-control">
+                            <option value="">All Classes</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="activeSubjectFilter">Subject</label>
+                        <select id="activeSubjectFilter" class="form-control">
+                            <option value="">All Subjects</option>
+                            <option value="Mathematics">Mathematics</option>
+                            <option value="Science">Science</option>
+                            <option value="English">English</option>
+                            <option value="Social Studies">Social Studies</option>
+                            <option value="Computer Science">Computer Science</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="assignments-grid" id="activeAssignmentsGrid">
+                    <!-- Assignments will be loaded here dynamically -->
+                </div>
+            </div>
+
+            <!-- Past Assignments Tab -->
+            <div class="tab-content" id="pastTab">
+                <div class="filters">
+                    <div class="filter-group">
+                        <label for="pastClassFilter">Class</label>
+                        <select id="pastClassFilter" class="form-control">
+                            <option value="">All Classes</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="pastSubjectFilter">Subject</label>
+                        <select id="pastSubjectFilter" class="form-control">
+                            <option value="">All Subjects</option>
+                            <option value="Mathematics">Mathematics</option>
+                            <option value="Science">Science</option>
+                            <option value="English">English</option>
+                            <option value="Social Studies">Social Studies</option>
+                            <option value="Computer Science">Computer Science</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="assignments-grid" id="pastAssignmentsGrid">
+                    <!-- Past assignments will be loaded here dynamically -->
+                </div>
+            </div>
+
+            <!-- Submissions Tab -->
+            <div class="tab-content" id="submissionsTab">
+                <div class="filters">
+                    <div class="filter-group">
+                        <label for="submissionAssignmentFilter">Assignment</label>
+                        <select id="submissionAssignmentFilter" class="form-control">
+                            <option value="">Select Assignment</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="submissionStatusFilter">Status</label>
+                        <select id="submissionStatusFilter" class="form-control">
+                            <option value="">All Statuses</option>
+                            <option value="submitted">Submitted</option>
+                            <option value="pending">Pending</option>
+                            <option value="graded">Graded</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="submissions-table-container">
+                    <table class="submissions-table">
+                        <thead>
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Roll Number</th>
+                                <th>Submission Date</th>
+                                <th>Status</th>
+                                <th>Grade</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="submissionsTableBody">
+                            <!-- Submissions will be loaded here dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Assignment Modal -->
+    <div id="createAssignmentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-clipboard-list"></i> Create New Assignment</h2>
+                <span class="close">&times;</span>
+            </div>
+            <form id="createAssignmentForm">
+                <div class="form-group">
+                    <label for="assignmentTitle">Title *</label>
+                    <input type="text" id="assignmentTitle" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="assignmentClass">Class *</label>
+                    <select id="assignmentClass" class="form-control" required>
+                        <option value="">Select Class</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="assignmentSubject">Subject *</label>
+                    <select id="assignmentSubject" class="form-control" required>
+                        <option value="">Select Subject</option>
+                        <option value="Mathematics">Mathematics</option>
+                        <option value="Science">Science</option>
+                        <option value="English">English</option>
+                        <option value="Social Studies">Social Studies</option>
+                        <option value="Computer Science">Computer Science</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="assignmentDescription">Description *</label>
+                    <textarea id="assignmentDescription" class="form-control" rows="4" required></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="assignmentDueDate">Due Date *</label>
+                        <input type="date" id="assignmentDueDate" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="assignmentMaxMarks">Max Marks *</label>
+                        <input type="number" id="assignmentMaxMarks" class="form-control" min="1" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="cancelCreateBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Create Assignment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/assignments.js') }}"></script>
+</body>
+</html>

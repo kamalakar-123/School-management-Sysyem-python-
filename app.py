@@ -129,6 +129,21 @@ def teacher_attendance():
     """Render the teacher attendance page"""
     return render_template('teacher/attendance.html')
 
+@app.route('/teacher/assignments')
+def teacher_assignments():
+    """Render the teacher assignments page"""
+    return render_template('teacher/assignments.html')
+
+@app.route('/teacher/grades')
+def teacher_grades():
+    """Render the teacher grades page"""
+    return render_template('teacher/grades.html')
+
+@app.route('/teacher/messages')
+def teacher_messages():
+    """Render the teacher messages page"""
+    return render_template('teacher/messages.html')
+
 # ============================================
 # API ROUTE: TEACHER STATISTICS
 # ============================================
