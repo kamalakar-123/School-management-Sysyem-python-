@@ -144,6 +144,11 @@ def teacher_messages():
     """Render the teacher messages page"""
     return render_template('teacher/messages.html')
 
+@app.route('/teacher/students')
+def teacher_students():
+    """Render the teacher students page"""
+    return render_template('teacher/students.html')
+
 # ============================================
 # API ROUTE: TEACHER STATISTICS
 # ============================================
@@ -171,9 +176,9 @@ def get_teacher_stats():
         today = datetime.now().strftime('%Y-%m-%d')
         attendance_stats = conn.execute(
             '''SELECT 
-                COUNT(CASE WHEN status = 'Present' THEN 1 END) as present,
+                COUNT(CASE WHEN status = 'present' THEN 1 END) as present,
                 COUNT(*) as total
-               FROM attendance
+               FROM daily_attendance
                WHERE date = ?''',
             (today,)
         ).fetchone()
@@ -344,6 +349,68 @@ def get_teacher_students():
             'success': False,
             'error': str(e),
             'students': []
+        }), 500
+
+@app.route('/api/teacher/students/all')
+def get_all_students():
+    """Get all students with detailed information for students page"""
+    search = request.args.get('search', '').strip()
+    class_filter = request.args.get('class', '').strip()
+    section_filter = request.args.get('section', '').strip()
+    
+    conn = get_db_connection()
+    
+    try:
+        query = '''SELECT student_id, roll_no, name, class, section, email, 
+                         enrollment_date, status
+                   FROM students
+                   WHERE 1=1'''
+        params = []
+        
+        # Apply filters
+        if search:
+            query += ''' AND (name LIKE ? OR roll_no LIKE ? OR student_id LIKE ?)'''
+            search_param = f'%{search}%'
+            params.extend([search_param, search_param, search_param])
+        
+        if class_filter:
+            query += ''' AND class = ?'''
+            params.append(class_filter)
+        
+        if section_filter:
+            query += ''' AND section = ?'''
+            params.append(section_filter)
+        
+        query += ''' ORDER BY class, section, roll_no'''
+        
+        students = conn.execute(query, params).fetchall()
+        
+        students_list = [{
+            'student_id': s['student_id'],
+            'roll_no': s['roll_no'],
+            'name': s['name'],
+            'class': s['class'],
+            'section': s['section'],
+            'email': s['email'],
+            'enrollment_date': s['enrollment_date'],
+            'status': s['status']
+        } for s in students]
+        
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'students': students_list,
+            'total': len(students_list)
+        })
+        
+    except Exception as e:
+        conn.close()
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'students': [],
+            'total': 0
         }), 500
 
 # ============================================

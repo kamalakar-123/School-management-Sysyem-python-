@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Students - Teacher Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/teacher/students.css') }}">
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <i class="fas fa-graduation-cap"></i>
+            <h2>Teacher Portal</h2>
+        </div>
+        <nav class="nav-menu">
+            <a href="/teacher/dashboard" class="nav-item">
+                <i class="fas fa-th-large"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/teacher/classes" class="nav-item">
+                <i class="fas fa-chalkboard-teacher"></i>
+                <span>My Classes</span>
+            </a>
+            <a href="/teacher/students" class="nav-item active">
+                <i class="fas fa-user-graduate"></i>
+                <span>Students</span>
+            </a>
+            <a href="/teacher/attendance" class="nav-item">
+                <i class="fas fa-user-check"></i>
+                <span>Attendance</span>
+            </a>
+            <a href="/teacher/assignments" class="nav-item">
+                <i class="fas fa-clipboard-list"></i>
+                <span>Assignments</span>
+            </a>
+            <a href="/teacher/grades" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Grades</span>
+            </a>
+            <a href="/teacher/messages" class="nav-item">
+                <i class="fas fa-envelope"></i>
+                <span>Messages</span>
+            </a>
+            <a href="/teacher/settings" class="nav-item">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="/teacher/login" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <h1><i class="fas fa-user-graduate"></i> Student Directory</h1>
+            <div class="header-actions">
+                <button class="btn btn-secondary" id="exportBtn">
+                    <i class="fas fa-download"></i> Export
+                </button>
+                <button class="btn btn-primary" id="refreshBtn">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon total">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-details">
+                    <h3 id="totalStudents">0</h3>
+                    <p>Total Students</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon active">
+                    <i class="fas fa-user-check"></i>
+                </div>
+                <div class="stat-details">
+                    <h3 id="activeStudents">0</h3>
+                    <p>Active Students</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon classes">
+                    <i class="fas fa-door-open"></i>
+                </div>
+                <div class="stat-details">
+                    <h3 id="totalClasses">0</h3>
+                    <p>Classes</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon sections">
+                    <i class="fas fa-layer-group"></i>
+                </div>
+                <div class="stat-details">
+                    <h3 id="totalSections">0</h3>
+                    <p>Sections</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filters -->
+        <div class="filters-card">
+            <div class="search-section">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search by name, roll number, or student ID...">
+                </div>
+            </div>
+            <div class="filter-section">
+                <div class="filter-group">
+                    <label for="classFilter">Class</label>
+                    <select id="classFilter" class="form-control">
+                        <option value="">All Classes</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="sectionFilter">Section</label>
+                    <select id="sectionFilter" class="form-control">
+                        <option value="">All Sections</option>
+                        <option value="A">Section A</option>
+                        <option value="B">Section B</option>
+                        <option value="C">Section C</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="statusFilter">Status</label>
+                    <select id="statusFilter" class="form-control">
+                        <option value="">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+                <button class="btn btn-secondary" id="clearFiltersBtn">
+                    <i class="fas fa-times"></i> Clear Filters
+                </button>
+            </div>
+        </div>
+
+        <!-- Students Table -->
+        <div class="table-card">
+            <div class="table-header">
+                <h3>Student List</h3>
+                <span class="result-count" id="resultCount">0 students</span>
+            </div>
+            <div class="table-container">
+                <table class="students-table">
+                    <thead>
+                        <tr>
+                            <th>Student ID</th>
+                            <th>Roll No</th>
+                            <th>Name</th>
+                            <th>Class</th>
+                            <th>Section</th>
+                            <th>Email</th>
+                            <th>Enrollment Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentsTableBody">
+                        <tr>
+                            <td colspan="9" class="empty-state">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <p>Loading students...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Student Modal -->
+    <div id="viewStudentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-user-circle"></i> Student Details</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="student-profile">
+                    <div class="profile-avatar">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <div class="profile-info">
+                        <h3 id="modalStudentName">-</h3>
+                        <p id="modalStudentClass">-</p>
+                    </div>
+                </div>
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Student ID</span>
+                        <span class="detail-value" id="modalStudentId">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Roll Number</span>
+                        <span class="detail-value" id="modalRollNo">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Email</span>
+                        <span class="detail-value" id="modalEmail">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Section</span>
+                        <span class="detail-value" id="modalSection">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Enrollment Date</span>
+                        <span class="detail-value" id="modalEnrollmentDate">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Status</span>
+                        <span class="detail-value" id="modalStatus">-</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="closeModalBtn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/teacher/students.js') }}"></script>
+</body>
+</html>
