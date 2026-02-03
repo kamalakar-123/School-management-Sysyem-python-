@@ -1,0 +1,110 @@
+/* Settings page-specific styles */
+
+/* Settings Container */
+.settings-container {
+    padding: 40px;
+}
+
+/* Settings Card */
+.settings-card {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.settings-card-title {
+    margin-bottom: 20px;
+    color: #2d3748;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.settings-form-grid {
+    display: grid;
+    gap: 20px;
+}
+
+.settings-form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #4a5568;
+    font-weight: 500;
+}
+
+.settings-form-input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+}
+
+/* Toggle Settings */
+.settings-toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.settings-toggle-info-title {
+    font-weight: 500;
+    color: #2d3748;
+}
+
+.settings-toggle-info-desc {
+    font-size: 14px;
+    color: #718096;
+}
+
+.settings-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.settings-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.settings-switch-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #4299e1;
+    transition: .4s;
+    border-radius: 24px;
+}
+
+/* Action Buttons */
+.settings-actions {
+    display: flex;
+    gap: 15px;
+}
+
+.settings-btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.settings-btn-save {
+    background: #4299e1;
+    color: white;
+}
+
+.settings-btn-reset {
+    background: #e53e3e;
+    color: white;
+}

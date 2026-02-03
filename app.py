@@ -94,6 +94,623 @@ def fees():
     return render_template('admin/fees.html')
 
 # ============================================
+# ROUTE: TEACHER LOGIN PAGE
+# ============================================
+
+@app.route('/teacher/login')
+def teacher_login():
+    """Render the teacher login page"""
+    return render_template('teacher/login.html')
+
+# ============================================
+# ROUTE: TEACHER DASHBOARD PAGE
+# ============================================
+
+@app.route('/teacher/dashboard')
+def teacher_dashboard():
+    """Render the teacher dashboard page"""
+    return render_template('teacher/dashboard.html')
+
+# ============================================
+# ROUTE: TEACHER CLASSES PAGE
+# ============================================
+
+@app.route('/teacher/classes')
+def teacher_classes():
+    """Render the teacher classes page"""
+    return render_template('teacher/classes.html')
+
+# ============================================
+# ROUTE: TEACHER ATTENDANCE PAGE
+# ============================================
+
+@app.route('/teacher/attendance')
+def teacher_attendance():
+    """Render the teacher attendance page"""
+    return render_template('teacher/attendance.html')
+
+# ============================================
+# API ROUTE: TEACHER STATISTICS
+# ============================================
+
+@app.route('/api/teacher/stats')
+def get_teacher_stats():
+    """
+    Get teacher dashboard statistics
+    Returns: JSON with teacher stats data
+    """
+    conn = get_db_connection()
+    
+    try:
+        # Get total classes assigned (using teachers table)
+        total_classes = conn.execute(
+            'SELECT COUNT(DISTINCT subject) FROM teachers'
+        ).fetchone()[0]
+        
+        # Get total students (all students in the school)
+        total_students = conn.execute(
+            'SELECT COUNT(*) FROM students'
+        ).fetchone()[0]
+        
+        # Calculate today's attendance percentage
+        today = datetime.now().strftime('%Y-%m-%d')
+        attendance_stats = conn.execute(
+            '''SELECT 
+                COUNT(CASE WHEN status = 'Present' THEN 1 END) as present,
+                COUNT(*) as total
+               FROM attendance
+               WHERE date = ?''',
+            (today,)
+        ).fetchone()
+        
+        if attendance_stats['total'] > 0:
+            attendance_percentage = round((attendance_stats['present'] / attendance_stats['total']) * 100, 1)
+        else:
+            attendance_percentage = 0
+        
+        # Get pending assignments (mock data - can be replaced with actual assignments table)
+        pending_assignments = 5  # TODO: Replace with actual query when assignments table is created
+        
+        # Get new messages (mock data - can be replaced with actual messages table)
+        new_messages = 3  # TODO: Replace with actual query when messages table is created
+        
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'total_classes': total_classes,
+            'total_students': total_students,
+            'attendance_percentage': attendance_percentage,
+            'pending_assignments': pending_assignments,
+            'new_messages': new_messages
+        })
+        
+    except Exception as e:
+        conn.close()
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'total_classes': 0,
+            'total_students': 0,
+            'attendance_percentage': 0,
+            'pending_assignments': 0,
+            'new_messages': 0
+        }), 500
+
+# ============================================
+# API ROUTE: TEACHER CLASSES DATA
+# ============================================
+
+@app.route('/api/teacher/classes')
+def get_teacher_classes():
+    """
+    Get all classes assigned to the teacher
+    Returns: JSON with classes data
+    """
+    conn = get_db_connection()
+    
+    try:
+        # Get unique classes from students table grouped by class
+        classes_data = conn.execute(
+            '''SELECT 
+                class as class_name,
+                COUNT(*) as total_students
+               FROM students
+               GROUP BY class
+               ORDER BY class'''
+        ).fetchall()
+        
+        classes_list = []
+        
+        for class_row in classes_data:
+            class_name = class_row['class_name']
+            total_students = class_row['total_students']
+            
+            # Calculate attendance rate for this class (simplified)
+            today = datetime.now().strftime('%Y-%m-%d')
+            try:
+                attendance_stats = conn.execute(
+                    '''SELECT 
+                        COUNT(CASE WHEN a.status = 'Present' THEN 1 END) as present,
+                        COUNT(*) as total
+                       FROM attendance a
+                       JOIN students s ON a.student_id = s.student_id
+                       WHERE s.class = ? AND a.date = ?''',
+                    (class_name, today)
+                ).fetchone()
+                
+                if attendance_stats and attendance_stats['total'] > 0:
+                    attendance_rate = round((attendance_stats['present'] / attendance_stats['total']) * 100)
+                else:
+                    attendance_rate = 0
+            except:
+                attendance_rate = 0
+            
+            # Get subject from teachers table (match first word of class with grade)
+            try:
+                subject_data = conn.execute(
+                    'SELECT subject FROM teachers LIMIT 1'
+                ).fetchone()
+                subject = subject_data['subject'] if subject_data else 'General'
+            except:
+                subject = 'General'
+            
+            classes_list.append({
+                'class_name': class_name,
+                'subject': subject,
+                'total_students': total_students,
+                'attendance_rate': attendance_rate,
+                'avg_grade': 'B+',  # TODO: Calculate from grades table when available
+                'schedule': 'Mon, Wed, Fri - 9:00 AM'  # TODO: Get from schedule table
+            })
+        
+        return jsonify({
+            'success': True,
+            'classes': classes_list
+        })
+        
+    except Exception as e:
+        print(f"Error in get_teacher_classes: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'classes': []
+        }), 500
+    finally:
+        conn.close()
+
+# ============================================
+# API ROUTE: GET STUDENTS FOR ATTENDANCE
+# ============================================
+
+@app.route('/api/teacher/students')
+def get_teacher_students():
+    """Get students for attendance marking"""
+    class_name = request.args.get('class', '')
+    section = request.args.get('section', 'A')
+    
+    conn = get_db_connection()
+    
+    try:
+        # If no class specified, return empty or get first available class
+        if not class_name or class_name == '':
+            return jsonify({
+                'success': False,
+                'error': 'Please select a class',
+                'students': []
+            })
+        
+        students = conn.execute(
+            '''SELECT student_id, name, class
+               FROM students
+               WHERE class = ?
+               ORDER BY student_id''',
+            (class_name,)
+        ).fetchall()
+        
+        students_list = [{
+            'student_id': s['student_id'],
+            'name': s['name'],
+            'class': s['class']
+        } for s in students]
+        
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'students': students_list
+        })
+        
+    except Exception as e:
+        conn.close()
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'students': []
+        }), 500
+
+# ============================================
+# API ROUTE: SAVE ATTENDANCE
+# ============================================
+
+@app.route('/api/teacher/attendance/save', methods=['POST'])
+def save_attendance():
+    """Save attendance records"""
+    try:
+        data = request.json
+        
+        if not data:
+            return jsonify({
+                'success': False,
+                'error': 'No data provided'
+            }), 400
+        
+        attendance_records = data.get('attendance', [])
+        
+        if not attendance_records:
+            return jsonify({
+                'success': False,
+                'error': 'No attendance records provided'
+            }), 400
+        
+        conn = get_db_connection()
+        
+        for record in attendance_records:
+            # Validate required fields
+            if not record.get('student_id') or not record.get('date'):
+                continue
+            
+            # Check if attendance already exists in daily_attendance table
+            existing = conn.execute(
+                '''SELECT id FROM daily_attendance
+                   WHERE student_id = ? AND date = ?''',
+                (record['student_id'], record['date'])
+            ).fetchone()
+            
+            # Map status to match database constraint (lowercase)
+            status_map = {
+                'Present': 'present',
+                'Absent': 'absent',
+                'Late': 'late',
+                'On Leave': 'absent'  # Map "On Leave" to absent
+            }
+            db_status = status_map.get(record.get('status', 'Present'), 'present')
+            
+            if existing:
+                # Update existing record
+                conn.execute(
+                    '''UPDATE daily_attendance
+                       SET status = ?
+                       WHERE student_id = ? AND date = ?''',
+                    (db_status, record['student_id'], record['date'])
+                )
+            else:
+                # Insert new record
+                conn.execute(
+                    '''INSERT INTO daily_attendance (student_id, date, status)
+                       VALUES (?, ?, ?)''',
+                    (record['student_id'], record['date'], db_status)
+                )
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'message': f'Attendance saved successfully for {len(attendance_records)} students'
+        })
+        
+    except Exception as e:
+        print(f"Error saving attendance: {e}")
+        import traceback
+        traceback.print_exc()
+        if 'conn' in locals():
+            conn.close()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+# ============================================
+# API ROUTE: DAILY ATTENDANCE REPORT
+# ============================================
+
+@app.route('/api/teacher/attendance/daily')
+def get_daily_attendance():
+    """Get daily attendance report"""
+    date = request.args.get('date')
+    class_name = request.args.get('class', '')
+    section = request.args.get('section', '')
+    
+    conn = get_db_connection()
+    
+    try:
+        # Build query based on filters
+        query = '''SELECT a.*, s.name, s.class, s.section
+                   FROM daily_attendance a
+                   JOIN students s ON a.student_id = s.student_id
+                   WHERE a.date = ?'''
+        params = [date]
+        
+        if class_name:
+            query += ' AND s.class = ?'
+            params.append(class_name)
+        
+        if section:
+            query += ' AND s.section = ?'
+            params.append(section)
+        
+        query += ' ORDER BY s.student_id'
+        
+        records = conn.execute(query, params).fetchall()
+        
+        # Calculate stats
+        stats = {
+            'total': len(records),
+            'present': sum(1 for r in records if r['status'] == 'present'),
+            'absent': sum(1 for r in records if r['status'] == 'absent'),
+            'late': sum(1 for r in records if r['status'] == 'late'),
+            'on_leave': 0,
+            'unmarked': 0
+        }
+        
+        details = [{
+            'student_id': r['student_id'],
+            'name': r['name'],
+            'class': r['class'],
+            'section': r['section'],
+            'status': r['status'].capitalize(),  # Convert to Title Case for display
+            'remarks': ''
+        } for r in records]
+        
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'stats': stats,
+            'details': details
+        })
+        
+    except Exception as e:
+        print(f"Error in get_daily_attendance: {e}")
+        import traceback
+        traceback.print_exc()
+        conn.close()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+# ============================================
+# API ROUTE: MONTHLY ATTENDANCE REPORT
+# ============================================
+
+@app.route('/api/teacher/attendance/monthly')
+def get_monthly_attendance():
+    """Get monthly attendance report"""
+    month = request.args.get('month')  # Format: YYYY-MM
+    class_name = request.args.get('class', '')
+    section = request.args.get('section', '')
+    
+    conn = get_db_connection()
+    
+    try:
+        # Get all students
+        query = 'SELECT student_id, name, class, section FROM students WHERE 1=1'
+        params = []
+        
+        if class_name:
+            query += ' AND class = ?'
+            params.append(class_name)
+        
+        if section:
+            query += ' AND section = ?'
+            params.append(section)
+        
+        students = conn.execute(query, params).fetchall()
+        
+        # Calculate attendance for each student
+        students_data = []
+        total_present = 0
+        total_records = 0
+        
+        for student in students:
+            # Get attendance for the month from daily_attendance
+            attendance = conn.execute(
+                '''SELECT status FROM daily_attendance
+                   WHERE student_id = ? AND strftime('%Y-%m', date) = ?''',
+                (student['student_id'], month)
+            ).fetchall()
+            
+            total_days = len(attendance)
+            present = sum(1 for a in attendance if a['status'] == 'present')
+            absent = sum(1 for a in attendance if a['status'] == 'absent')
+            
+            if total_days > 0:
+                percentage = round((present / total_days) * 100, 1)
+            else:
+                percentage = 0
+            
+            students_data.append({
+                'student_id': student['student_id'],
+                'name': student['name'],
+                'class': student['class'],
+                'section': student['section'],
+                'total_days': total_days,
+                'present': present,
+                'absent': absent,
+                'percentage': percentage
+            })
+            
+            total_present += present
+            total_records += total_days
+        
+        # Calculate overall percentage
+        if total_records > 0:
+            overall_percentage = round((total_present / total_records) * 100, 2)
+        else:
+            overall_percentage = 0
+        
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'overall_percentage': overall_percentage,
+            'students': students_data
+        })
+        
+    except Exception as e:
+        print(f"Error in get_monthly_attendance: {e}")
+        import traceback
+        traceback.print_exc()
+        conn.close()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+# ============================================
+# API ROUTE: LOW ATTENDANCE ALERT
+# ============================================
+
+@app.route('/api/teacher/attendance/low')
+def get_low_attendance():
+    """Get students with low attendance"""
+    month = request.args.get('month')
+    threshold = float(request.args.get('threshold', 75))
+    class_name = request.args.get('class', '')
+    section = request.args.get('section', '')
+    
+    conn = get_db_connection()
+    
+    try:
+        query = 'SELECT student_id, name, class, section FROM students WHERE 1=1'
+        params = []
+        
+        if class_name:
+            query += ' AND class = ?'
+            params.append(class_name)
+        
+        if section:
+            query += ' AND section = ?'
+            params.append(section)
+        
+        students = conn.execute(query, params).fetchall()
+        
+        low_attendance_students = []
+        
+        for student in students:
+            # Get attendance for the month from daily_attendance
+            attendance = conn.execute(
+                '''SELECT status FROM daily_attendance
+                   WHERE student_id = ? AND strftime('%Y-%m', date) = ?''',
+                (student['student_id'], month)
+            ).fetchall()
+            
+            total_days = len(attendance)
+            present = sum(1 for a in attendance if a['status'] == 'present')
+            absent = total_days - present
+            
+            if total_days > 0:
+                percentage = round((present / total_days) * 100, 1)
+                
+                if percentage < threshold:
+                    low_attendance_students.append({
+                        'student_id': student['student_id'],
+                        'name': student['name'],
+                        'class': student['class'],
+                        'section': student['section'],
+                        'total_days': total_days,
+                        'present': present,
+                        'absent': absent,
+                        'percentage': percentage
+                    })
+        
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'students': low_attendance_students
+        })
+        
+    except Exception as e:
+        print(f"Error in get_low_attendance: {e}")
+        import traceback
+        traceback.print_exc()
+        conn.close()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+# ============================================
+# API ROUTE: ALERT LOGS
+# ============================================
+
+@app.route('/api/teacher/alert-logs')
+def get_alert_logs():
+    """Get parent alert logs (simulated)"""
+    
+    # Sample alert logs data
+    sample_logs = [
+        {
+            'date': '02/01/2026',
+            'student_name': 'Amit Kumar',
+            'roll_no': '103',
+            'class': '10',
+            'section': 'A',
+            'parent_contact': '9876543212',
+            'parent_email': 'kamalakara2005@gmail.com',
+            'message': 'Dear Parent, Your child Amit Kumar (Roll No: 103, Class: 10-A) has been marked absent today (02/01/2026). If this information is incorrect, please contact the school immediately.',
+            'status': 'SENT'
+        },
+        {
+            'date': '12/12/2025',
+            'student_name': 'Kamalakara',
+            'roll_no': '111',
+            'class': '10',
+            'section': 'A',
+            'parent_contact': '8431521612',
+            'parent_email': 'vivek.tr2023@gmail.com',
+            'message': 'Dear Parent, Your child Kamalakara (Roll No: 111, Class: 10-A) has been marked absent today (12/12/2025). If this information is incorrect, please contact the school immediately.',
+            'status': 'SENT'
+        },
+        {
+            'date': '12/12/2025',
+            'student_name': 'Amit Kumar',
+            'roll_no': '103',
+            'class': '10',
+            'section': 'A',
+            'parent_contact': '9876543212',
+            'parent_email': 'kamalakara2005@gmail.com',
+            'message': 'Dear Parent, Your child Amit Kumar (Roll No: 103, Class: 10-A) has been marked absent today (12/12/2025). If this information is incorrect, please contact the school immediately.',
+            'status': 'SENT'
+        },
+        {
+            'date': '10/12/2025',
+            'student_name': 'Amit Kumar',
+            'roll_no': '103',
+            'class': '10',
+            'section': 'A',
+            'parent_contact': '9876543212',
+            'parent_email': 'kamalakara2005@gmail.com',
+            'message': 'Dear Parent, Your child Amit Kumar (Roll No: 103, Class: 10-A) has been marked absent today (10/12/2025). If this information is incorrect, please contact the school immediately.',
+            'status': 'SENT'
+        }
+    ]
+    
+    return jsonify({
+        'success': True,
+        'logs': sample_logs
+    })
+
+# ============================================
 # API ROUTE: FEES DATA
 # ============================================
 
@@ -1013,7 +1630,7 @@ def add_teacher():
 # ============================================
 
 @app.route('/api/teacher-attendance', methods=['GET', 'POST'])
-def teacher_attendance():
+def api_teacher_attendance():
     """
     GET: Fetch attendance for a specific date (default: today)
     POST: Save teacher attendance records
@@ -1274,7 +1891,17 @@ if __name__ == '__main__':
     init_database()
     
     print("\n🚀 Starting Flask server...")
-    print("📊 Dashboard URL: http://127.0.0.1:5000/dashboard")
+    print("\n📊 ADMIN URLs:")
+    print("   • Dashboard:   http://127.0.0.1:5000/dashboard")
+    print("   • Students:    http://127.0.0.1:5000/students")
+    print("   • Teachers:    http://127.0.0.1:5000/teachers")
+    print("   • Attendance:  http://127.0.0.1:5000/attendance")
+    print("   • Fees:        http://127.0.0.1:5000/fees")
+    print("\n👨‍🏫 TEACHER URLs:")
+    print("   • Login:       http://127.0.0.1:5000/teacher/login")
+    print("   • Dashboard:   http://127.0.0.1:5000/teacher/dashboard")
+    print("   • Classes:     http://127.0.0.1:5000/teacher/classes")
+    print("   • Attendance:  http://127.0.0.1:5000/teacher/attendance")
     print("\n💡 Press CTRL+C to stop the server\n")
     print("="*50 + "\n")
     

@@ -1,0 +1,312 @@
+/* Attendance page-specific styles */
+
+/* Stats Grid Override */
+.attendance-stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+/* Clickable Stat Cards */
+.attendance-stat-card-clickable {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+/* Chart Full Width */
+.attendance-chart-full {
+    grid-column: 1 / -1;
+}
+
+/* Chart Filters */
+.attendance-chart-filters {
+    padding: 15px 20px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.attendance-filter-icon-wrapper {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.attendance-filter-icon {
+    color: #718096;
+}
+
+.attendance-filter-label {
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 14px;
+}
+
+.attendance-filter-select {
+    padding: 8px 12px;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    background: white;
+    font-size: 13px;
+    color: #2d3748;
+    cursor: pointer;
+    min-width: 150px;
+}
+
+.attendance-filter-select-small {
+    min-width: 120px;
+}
+
+.attendance-filter-btn {
+    padding: 8px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.attendance-filter-btn-reset {
+    padding: 8px 16px;
+    background: #e2e8f0;
+    color: #4a5568;
+}
+
+/* Reports Section */
+.attendance-reports-section {
+    margin-top: 30px;
+}
+
+.attendance-report-header {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    padding: 20px;
+    border-radius: 12px 12px 0 0;
+    color: white;
+}
+
+.attendance-report-header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.attendance-report-title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.attendance-report-subtitle {
+    margin: 5px 0 0 0;
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+.attendance-report-toggle-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.attendance-report-filters {
+    padding: 20px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    gap: 15px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.attendance-report-filter-group {
+    flex: 1;
+    min-width: 200px;
+}
+
+.attendance-report-filter-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 14px;
+}
+
+.attendance-report-filter-input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #cbd5e0;
+    border-radius: 8px;
+    background: white;
+    font-size: 14px;
+    color: #2d3748;
+    cursor: pointer;
+}
+
+.attendance-report-generate-btn {
+    padding: 12px 30px;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
+}
+
+/* Report Stats */
+.attendance-report-stats {
+    display: none;
+    padding: 20px;
+    background: white;
+}
+
+.attendance-report-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.attendance-report-stat-card {
+    padding: 20px;
+    border-radius: 12px;
+    color: white;
+}
+
+.attendance-report-stat-card-present {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    box-shadow: 0 4px 15px rgba(17, 153, 142, 0.3);
+}
+
+.attendance-report-stat-card-absent {
+    background: linear-gradient(135deg, #ff6a00 0%, #ee0979 100%);
+    box-shadow: 0 4px 15px rgba(238, 9, 121, 0.3);
+}
+
+.attendance-report-stat-card-days {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+}
+
+.attendance-report-stat-card-avg {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    box-shadow: 0 4px 15px rgba(250, 112, 154, 0.3);
+}
+
+.attendance-report-stat-number {
+    font-size: 32px;
+    font-weight: 700;
+}
+
+.attendance-report-stat-label {
+    font-size: 14px;
+    margin-top: 5px;
+    opacity: 0.9;
+}
+
+.attendance-report-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: #f7fafc;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.attendance-report-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.attendance-report-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.attendance-report-btn-export {
+    background: #10b981;
+    color: white;
+}
+
+.attendance-report-btn-print {
+    background: #3b82f6;
+    color: white;
+}
+
+.attendance-report-empty-row {
+    text-align: center;
+    padding: 40px;
+    color: #718096;
+}
+
+.attendance-report-empty-icon {
+    font-size: 48px;
+    margin-bottom: 10px;
+    opacity: 0.3;
+}
+
+.attendance-report-empty-text {
+    font-size: 16px;
+}
+
+/* Attendance Table Section */
+.attendance-table-controls {
+    display: none;
+    padding: 15px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-bottom: 1px solid #e2e8f0;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.attendance-table-controls-row {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex: 1;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.attendance-table-controls-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-left: auto;
+}
+
+.attendance-table-count-badge {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 8px 16px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.attendance-table-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.attendance-table-wrapper-hidden {
+    display: none;
+}

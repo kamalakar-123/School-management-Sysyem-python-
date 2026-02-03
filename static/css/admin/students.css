@@ -1,0 +1,20 @@
+/* Students page-specific styles */
+
+/* Clear Search Hidden State */
+.students-clear-search-hidden {
+    display: none;
+}
+
+/* Empty State */
+.students-empty-state {
+    display: none;
+}
+
+/* Add Student Modal */
+.add-student-modal {
+    display: none;
+}
+
+.add-student-modal-content {
+    max-width: 600px;
+}

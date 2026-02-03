@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Management - Teacher Portal</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/teacher/attendance.css') }}">
+</head>
+<body>
+    
+    <!-- SIDEBAR NAVIGATION -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-chalkboard-teacher"></i>
+                <span>Teacher Portal</span>
+            </div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a href="/teacher/dashboard" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/teacher/classes" class="nav-item">
+                <i class="fas fa-users"></i>
+                <span>My Classes</span>
+            </a>
+            <a href="/teacher/attendance" class="nav-item active">
+                <i class="fas fa-clipboard-check"></i>
+                <span>Attendance</span>
+            </a>
+            <a href="/teacher/assignments" class="nav-item">
+                <i class="fas fa-tasks"></i>
+                <span>Assignments</span>
+            </a>
+            <a href="/teacher/grades" class="nav-item">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Grades</span>
+            </a>
+            <a href="/teacher/messages" class="nav-item">
+                <i class="fas fa-envelope"></i>
+                <span>Messages</span>
+            </a>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-info">
+                    <div class="user-name" id="teacherName">Teacher Name</div>
+                    <div class="user-role">Teacher</div>
+                </div>
+            </div>
+            <a href="/teacher/login" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </div>
+    
+    <!-- MAIN CONTENT AREA -->
+    <div class="main-content">
+        
+        <!-- TOP HEADER -->
+        <header class="attendance-header">
+            <div class="header-icon">
+                <i class="fas fa-clipboard-check"></i>
+            </div>
+            <div class="header-content">
+                <h1>Attendance Management</h1>
+                <p id="currentDate"></p>
+            </div>
+        </header>
+        
+        <!-- TAB NAVIGATION -->
+        <div class="tab-navigation">
+            <button class="tab-btn active" data-tab="mark-attendance">
+                <i class="fas fa-check-circle"></i> Mark Attendance
+            </button>
+            <button class="tab-btn" data-tab="daily-report">
+                <i class="fas fa-chart-bar"></i> Daily Report
+            </button>
+            <button class="tab-btn" data-tab="monthly-report">
+                <i class="fas fa-calendar-alt"></i> Monthly Report
+            </button>
+            <button class="tab-btn" data-tab="low-attendance">
+                <i class="fas fa-exclamation-triangle"></i> Low Attendance
+            </button>
+            <button class="tab-btn" data-tab="alert-logs">
+                <i class="fas fa-bell"></i> Alert Logs
+            </button>
+        </div>
+        
+        <!-- TAB CONTENT AREA -->
+        <div class="tab-content-wrapper">
+            
+            <!-- TAB 1: MARK ATTENDANCE -->
+            <div class="tab-content active" id="mark-attendance">
+                <div class="content-card">
+                    <div class="card-header">
+                        <h2>📝 Mark Attendance</h2>
+                        <p>Select class, section, and date to mark student attendance</p>
+                    </div>
+                    
+                    <div class="filters-section">
+                        <h3>Select Class & Date</h3>
+                        <div class="filter-grid">
+                            <div class="filter-item">
+                                <label>Date</label>
+                                <input type="date" id="attendanceDate" class="form-control">
+                            </div>
+                            <div class="filter-item">
+                                <label>Class *</label>
+                                <select id="classSelect" class="form-control">
+                                    <option value="">Select a class...</option>
+                                </select>
+                            </div>
+                            <div class="filter-item">
+                                <label>Section</label>
+                                <select id="sectionSelect" class="form-control">
+                                    <option value="A">Section A</option>
+                                    <option value="B">Section B</option>
+                                </select>
+                            </div>
+                            <div class="filter-item">
+                                <button class="load-btn" onclick="loadStudents()">
+                                    Load Students
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="attendance-section" id="attendanceSection" style="display: none;">
+                        <div class="section-header">
+                            <h3 id="attendanceTitle">Attendance for Section A - 2026-01-31</h3>
+                            <button class="mark-all-btn" onclick="markAllPresent()">
+                                Mark All Present
+                            </button>
+                        </div>
+                        
+                        <div class="table-container">
+                            <table class="attendance-table">
+                                <thead>
+                                    <tr>
+                                        <th>Roll No</th>
+                                        <th>Name</th>
+                                        <th>Class</th>
+                                        <th>Section</th>
+                                        <th>Status</th>
+                                        <th>Remarks</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="studentsTableBody">
+                                    <!-- Students will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="action-buttons">
+                            <button class="save-btn" onclick="saveAttendance()">
+                                <i class="fas fa-save"></i> Save Attendance
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- TAB 2: DAILY REPORT -->
+            <div class="tab-content" id="daily-report">
+                <div class="content-card">
+                    <div class="card-header">
+                        <h2>📊 Daily Attendance Report</h2>
+                        <p>View attendance summary and details for a specific date</p>
+                    </div>
+                    
+                    <div class="filters-section">
+                        <h3>Select Date & Filters</h3>
+                        <div class="filter-grid">
+                            <div class="filter-item">
+                                <label>Date</label>
+                                <input type="date" id="dailyReportDate" class="form-control">
+                            </div>
+                            <div class="filter-item">
+                                <label>Class</label>
+                                <select id="dailyClassSelect" class="form-control">
+                                    <option value="">All Classes</option>
+                                </select>
+                            </div>
+                            <div class="filter-item">
+                                <label>Section</label>
+                                <select id="dailySectionSelect" class="form-control">
+                                    <option value="">All Sections</option>
+                                    <option value="A">Section A</option>
+                                    <option value="B">Section B</option>
+                                </select>
+                            </div>
+                            <div class="filter-item">
+                                <button class="generate-btn" onclick="generateDailyReport()">
+                                    Generate Report
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="report-stats" id="dailyStats">
+                        <!-- Stats will be loaded here -->
+                    </div>
+                    
+                    <div class="report-details" id="dailyReportDetails">
+                        <!-- Report details will be loaded here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- TAB 3: MONTHLY REPORT -->
+            <div class="tab-content" id="monthly-report">
+                <div class="content-card">
+                    <div class="card-header">
+                        <h2>📈 Monthly Attendance Report</h2>
+                        <p>View comprehensive monthly attendance statistics</p>
+                    </div>
+                    
+                    <div class="filters-section">
+                        <h3>Select Month & Filters</h3>
+                        <div class="filter-grid">
+                            <div class="filter-item">
+                                <label>Month</label>
+                                <input type="month" id="monthSelect" class="form-control">
+                            </div>
+                            <div class="filter-item">
+                                <label>Class</label>
+                                <select id="monthlyClassSelect" class="form-control">
+                                    <option value="">All Classes</option>
+                                </select>
+                            </div>
+                            <div class="filter-item">
+                                <label>Section</label>
+                                <select id="monthlySectionSelect" class="form-control">
+                                    <option value="">All Sections</option>
+                                    <option value="A">Section A</option>
+                                    <option value="B">Section B</option>
+                                </select>
+                            </div>
+                            <div class="filter-item">
+                                <button class="generate-btn" onclick="generateMonthlyReport()">
+                                    Generate Report
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="monthly-overview" id="monthlyOverview">
+                        <!-- Monthly overview will be loaded here -->
+                    </div>
+                    
+                    <div class="report-details" id="monthlyReportDetails">
+                        <!-- Monthly report details will be loaded here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- TAB 4: LOW ATTENDANCE ALERT -->
+            <div class="tab-content" id="low-attendance">
+                <div class="content-card">
+                    <div class="card-header">
+                        <h2>⚠️ Low Attendance Alert</h2>
+                        <p>Identify students with attendance below threshold</p>
+                    </div>
+                    
+                    <div class="filters-section">
+                        <h3>Configure Filters</h3>
+                        <div class="filter-grid">
+                            <div class="filter-item">
+                                <label>Month</label>
+                                <input type="month" id="alertMonth" class="form-control">
+                            </div>
+                            <div class="filter-item">
+                                <label>Threshold (%)</label>
+                                <input type="number" id="thresholdInput" class="form-control" value="75" min="0" max="100">
+                            </div>
+                            <div class="filter-item">
+                                <label>Class</label>
+                                <select id="alertClassSelect" class="form-control">
+                                    <option value="">All Classes</option>
+                                </select>
+                            </div>
+                            <div class="filter-item">
+                                <label>Section</label>
+                                <select id="alertSectionSelect" class="form-control">
+                                    <option value="">All Sections</option>
+                                    <option value="A">Section A</option>
+                                    <option value="B">Section B</option>
+                                </select>
+                            </div>
+                            <div class="filter-item">
+                                <button class="find-btn" onclick="findLowAttendance()">
+                                    Find Students
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert-results" id="alertResults">
+                        <!-- Alert results will be loaded here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- TAB 5: ALERT LOGS -->
+            <div class="tab-content" id="alert-logs">
+                <div class="content-card">
+                    <div class="card-header">
+                        <h2>📱 Parent Alert Logs</h2>
+                        <p>View all simulated absence alerts sent to parents</p>
+                    </div>
+                    
+                    <div class="logs-header">
+                        <h3>Recent Alerts (Latest 100)</h3>
+                        <span class="alert-badge" id="alertCount">0 alerts</span>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table class="logs-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Student</th>
+                                    <th>Roll No</th>
+                                    <th>Class</th>
+                                    <th>Section</th>
+                                    <th>Parent Contact</th>
+                                    <th>Channel</th>
+                                    <th>Message</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="alertLogsBody">
+                                <!-- Alert logs will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+        
+    </div>
+    
+    <!-- LOADING OVERLAY -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <p>Loading...</p>
+    </div>
+    
+    <!-- Custom JavaScript -->
+    <script src="{{ url_for('static', filename='js/teacher/attendance.js') }}"></script>
+    
+</body>
+</html>

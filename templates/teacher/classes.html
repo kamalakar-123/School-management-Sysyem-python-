@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Classes - Teacher Portal</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/teacher/classes.css') }}">
+</head>
+<body>
+    
+    <!-- SIDEBAR NAVIGATION -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-chalkboard-teacher"></i>
+                <span>Teacher Portal</span>
+            </div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a href="/teacher/dashboard" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/teacher/classes" class="nav-item active">
+                <i class="fas fa-users"></i>
+                <span>My Classes</span>
+            </a>
+            <a href="/teacher/attendance" class="nav-item">
+                <i class="fas fa-clipboard-check"></i>
+                <span>Attendance</span>
+            </a>
+            <a href="/teacher/assignments" class="nav-item">
+                <i class="fas fa-tasks"></i>
+                <span>Assignments</span>
+            </a>
+            <a href="/teacher/grades" class="nav-item">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Grades</span>
+            </a>
+            <a href="/teacher/messages" class="nav-item">
+                <i class="fas fa-envelope"></i>
+                <span>Messages</span>
+            </a>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-info">
+                    <div class="user-name" id="teacherName">Teacher Name</div>
+                    <div class="user-role">Teacher</div>
+                </div>
+            </div>
+            <a href="/teacher/login" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </div>
+    
+    <!-- MAIN CONTENT AREA -->
+    <div class="main-content">
+        
+        <!-- TOP HEADER BAR -->
+        <header class="header">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 class="page-title">My Classes</h1>
+            </div>
+            
+            <div class="header-right">
+                <div class="header-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search classes..." id="searchInput">
+                </div>
+                
+                <button class="notification-btn" id="notificationBtn">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge" id="notificationBadge">0</span>
+                </button>
+                
+                <div class="date-display">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span id="currentDate"></span>
+                </div>
+            </div>
+        </header>
+        
+        <!-- PAGE CONTENT -->
+        <div class="content-wrapper">
+            
+            <!-- FILTER BAR -->
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <button class="filter-btn active" data-filter="all">
+                        <i class="fas fa-th"></i> All Classes
+                    </button>
+                    <button class="filter-btn" data-filter="today">
+                        <i class="fas fa-calendar-day"></i> Today's Classes
+                    </button>
+                    <button class="filter-btn" data-filter="upcoming">
+                        <i class="fas fa-clock"></i> Upcoming
+                    </button>
+                </div>
+                
+                <button class="add-btn" id="addClassBtn">
+                    <i class="fas fa-plus"></i> Add New Class
+                </button>
+            </div>
+            
+            <!-- CLASSES GRID -->
+            <div class="classes-grid" id="classesGrid">
+                <!-- Classes will be loaded here dynamically -->
+            </div>
+            
+            <!-- EMPTY STATE -->
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <i class="fas fa-chalkboard fa-4x"></i>
+                <h3>No Classes Found</h3>
+                <p>You don't have any classes assigned yet.</p>
+            </div>
+            
+        </div>
+        
+        <!-- FOOTER -->
+        <footer class="footer">
+            <p>&copy; 2026 SchoolHub Management System. All rights reserved.</p>
+        </footer>
+        
+    </div>
+    
+    <!-- LOADING OVERLAY -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <p>Loading classes...</p>
+    </div>
+    
+    <!-- CLASS DETAILS MODAL -->
+    <div class="modal" id="classModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Class Details</h2>
+                <button class="close-btn" onclick="closeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Class details will be loaded here -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Custom JavaScript -->
+    <script src="{{ url_for('static', filename='js/teacher/classes.js') }}"></script>
+    
+</body>
+</html>

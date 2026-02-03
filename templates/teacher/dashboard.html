@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard - School Management System</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/teacher/dashboard.css') }}">
+</head>
+<body>
+    
+    <!-- SIDEBAR NAVIGATION -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-chalkboard-teacher"></i>
+                <span>Teacher Portal</span>
+            </div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a href="/teacher/dashboard" class="nav-item active">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/teacher/classes" class="nav-item">
+                <i class="fas fa-users"></i>
+                <span>My Classes</span>
+            </a>
+            <a href="/teacher/attendance" class="nav-item">
+                <i class="fas fa-clipboard-check"></i>
+                <span>Attendance</span>
+            </a>
+            <a href="/teacher/assignments" class="nav-item">
+                <i class="fas fa-tasks"></i>
+                <span>Assignments</span>
+            </a>
+            <a href="/teacher/grades" class="nav-item">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Grades</span>
+            </a>
+            <a href="/teacher/messages" class="nav-item">
+                <i class="fas fa-envelope"></i>
+                <span>Messages</span>
+            </a>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-info">
+                    <div class="user-name" id="teacherName">Teacher Name</div>
+                    <div class="user-role">Teacher</div>
+                </div>
+            </div>
+            <a href="/teacher/login" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </div>
+    
+    <!-- MAIN CONTENT AREA -->
+    <div class="main-content">
+        
+        <!-- TOP HEADER BAR -->
+        <header class="header">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 class="page-title">Dashboard Overview</h1>
+            </div>
+            
+            <div class="header-right">
+                <div class="header-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search...">
+                </div>
+                
+                <button class="notification-btn" id="notificationBtn">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge" id="notificationBadge">0</span>
+                </button>
+                
+                <div class="date-display">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span id="currentDate"></span>
+                </div>
+            </div>
+        </header>
+        
+        <!-- WELCOME SECTION -->
+        <section class="welcome-section">
+            <div class="welcome-content">
+                <h2>Welcome back, <span id="welcomeName">Teacher</span>! 👋</h2>
+                <p>Here's what's happening with your classes today.</p>
+            </div>
+        </section>
+        
+        <!-- STATISTICS CARDS SECTION -->
+        <section class="stats-section">
+            <div class="stats-grid">
+                
+                <!-- Card 1: My Classes -->
+                <div class="stat-card" data-aos="fade-up" data-aos-delay="0">
+                    <div class="stat-icon classes">
+                        <i class="fas fa-door-open"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-label">My Classes</h3>
+                        <div class="stat-value" id="totalClasses">0</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-book"></i>
+                            <span>Classes assigned</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Card 2: Total Students -->
+                <div class="stat-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="stat-icon students">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-label">Total Students</h3>
+                        <div class="stat-value" id="totalStudents">0</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-users"></i>
+                            <span>In all classes</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Card 3: Today's Attendance -->
+                <div class="stat-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="stat-icon attendance">
+                        <i class="fas fa-clipboard-check"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-label">Today's Attendance</h3>
+                        <div class="stat-value" id="attendancePercentage">0%</div>
+                        <div class="stat-change" id="attendanceChange">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Average rate</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Card 4: Pending Assignments -->
+                <div class="stat-card" data-aos="fade-up" data-aos-delay="300">
+                    <div class="stat-icon assignments">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-label">Pending Assignments</h3>
+                        <div class="stat-value" id="pendingAssignments">0</div>
+                        <div class="stat-change neutral">
+                            <i class="fas fa-clock"></i>
+                            <span>Need review</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Card 5: New Messages -->
+                <div class="stat-card" data-aos="fade-up" data-aos-delay="400">
+                    <div class="stat-icon messages">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-label">New Messages</h3>
+                        <div class="stat-value" id="newMessages">0</div>
+                        <div class="stat-change neutral">
+                            <i class="fas fa-comment-dots"></i>
+                            <span>Unread messages</span>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </section>
+        
+        <!-- QUICK ACTIONS -->
+        <section class="quick-actions-section">
+            <h3 class="section-title">Quick Actions</h3>
+            <div class="quick-actions-grid">
+                <a href="/teacher/attendance" class="quick-action-card">
+                    <i class="fas fa-clipboard-check"></i>
+                    <span>Mark Attendance</span>
+                </a>
+                <a href="/teacher/assignments" class="quick-action-card">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Create Assignment</span>
+                </a>
+                <a href="/teacher/grades" class="quick-action-card">
+                    <i class="fas fa-pen"></i>
+                    <span>Enter Grades</span>
+                </a>
+                <a href="/teacher/messages" class="quick-action-card">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>Send Message</span>
+                </a>
+            </div>
+        </section>
+        
+        <!-- FOOTER -->
+        <footer class="footer">
+            <p>&copy; 2026 SchoolHub Management System. All rights reserved.</p>
+            <p class="footer-tech">Teacher Portal | Powered by Flask</p>
+        </footer>
+        
+    </div>
+    
+    <!-- LOADING OVERLAY -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-icon">
+                <i class="fas fa-chalkboard-teacher fa-3x"></i>
+            </div>
+            <h2>Loading Dashboard</h2>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Custom JavaScript -->
+    <script src="{{ url_for('static', filename='js/teacher/dashboard.js') }}"></script>
+    
+</body>
+</html>

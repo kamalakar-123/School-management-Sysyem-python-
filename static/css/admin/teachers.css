@@ -1,0 +1,539 @@
+/* Teachers page-specific styles */
+
+/* Clear Search Hidden State */
+.teachers-clear-search-hidden {
+    display: none;
+}
+
+/* Attendance Section */
+.teachers-attendance-section {
+    margin: 25px 30px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    overflow: hidden;
+}
+
+.teachers-attendance-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.teachers-attendance-title {
+    color: white;
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.teachers-attendance-subtitle {
+    color: rgba(255,255,255,0.9);
+    font-size: 14px;
+    margin: 0;
+}
+
+.teachers-date-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.teachers-date-label {
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.teachers-date-input {
+    padding: 8px 12px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 8px;
+    background: rgba(255,255,255,0.95);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.teachers-attendance-content {
+    padding: 25px;
+}
+
+/* Quick Stats */
+.teachers-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.teachers-stat-card {
+    padding: 20px;
+    border-radius: 10px;
+    color: white;
+}
+
+.teachers-stat-card-present {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+.teachers-stat-card-absent {
+    background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
+}
+
+.teachers-stat-card-leave {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.teachers-stat-card-not-marked {
+    background: linear-gradient(135deg, #868f96 0%, #596164 100%);
+}
+
+.teachers-stat-number {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.teachers-stat-label {
+    font-size: 13px;
+    opacity: 0.9;
+}
+
+/* Attendance Table */
+.teachers-attendance-table {
+    overflow-x: auto;
+}
+
+.teachers-attendance-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.teachers-attendance-table thead tr {
+    background: #f7fafc;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.teachers-attendance-table th {
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.teachers-attendance-table th.text-center {
+    text-align: center;
+}
+
+.teachers-empty-placeholder {
+    padding: 50px;
+    text-align: center;
+}
+
+.teachers-empty-icon {
+    font-size: 48px;
+    color: #cbd5e0;
+}
+
+.teachers-empty-text {
+    color: #718096;
+    font-size: 16px;
+    margin: 15px 0;
+}
+
+.teachers-load-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+    box-shadow: 0 4px 6px rgba(102, 126, 234, 0.4);
+}
+
+.teachers-load-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(102, 126, 234, 0.5);
+}
+
+/* Action Buttons */
+.teachers-action-buttons {
+    margin-top: 25px;
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.teachers-btn-mark-all {
+    background: #48bb78;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+}
+
+.teachers-btn-mark-all:hover {
+    background: #38a169;
+}
+
+.teachers-btn-save {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+    box-shadow: 0 4px 6px rgba(102, 126, 234, 0.4);
+}
+
+.teachers-btn-save:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(102, 126, 234, 0.5);
+}
+
+/* Teachers Table Section */
+.teachers-table-section {
+    margin: 25px 30px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    overflow: hidden;
+}
+
+.teachers-table-header {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    padding: 20px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.teachers-table-title {
+    color: white;
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.teachers-table-subtitle {
+    color: rgba(255,255,255,0.9);
+    font-size: 14px;
+    margin: 0;
+}
+
+.teachers-toggle-btn {
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+}
+
+.teachers-toggle-btn:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+.teachers-content-hidden {
+    display: none;
+}
+
+/* Search and Filter Controls */
+.teachers-search-controls {
+    padding: 20px;
+    border-bottom: 1px solid #e2e8f0;
+    background: #f7fafc;
+}
+
+.teachers-search-wrapper {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.teachers-search-box {
+    flex: 1;
+    min-width: 250px;
+    position: relative;
+}
+
+.teachers-search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #a0aec0;
+}
+
+.teachers-search-input {
+    width: 100%;
+    padding: 10px 12px 10px 40px;
+    border: 1px solid #cbd5e0;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.teachers-clear-btn {
+    display: none;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #e2e8f0;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    color: #4a5568;
+}
+
+.teachers-filter-select {
+    padding: 10px 12px;
+    border: 1px solid #cbd5e0;
+    border-radius: 8px;
+    font-size: 14px;
+    background: white;
+    min-width: 180px;
+}
+
+.teachers-count-badge {
+    background: #667eea;
+    color: white;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* Reports Section */
+.teachers-reports-section {
+    margin: 25px 30px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    overflow: hidden;
+}
+
+.teachers-reports-header {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    padding: 20px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.teachers-reports-title {
+    color: white;
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.teachers-reports-subtitle {
+    color: rgba(255,255,255,0.9);
+    font-size: 14px;
+    margin: 0;
+}
+
+.teachers-reports-content {
+    display: none;
+    padding: 25px;
+}
+
+.teachers-report-filters {
+    background: #f7fafc;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+}
+
+.teachers-report-filter-row {
+    display: flex;
+    gap: 20px;
+    align-items: end;
+    flex-wrap: wrap;
+}
+
+.teachers-report-filter-group {
+    flex: 1;
+    min-width: 180px;
+}
+
+.teachers-report-filter-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 14px;
+}
+
+.teachers-report-filter-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #cbd5e0;
+    border-radius: 8px;
+    font-size: 14px;
+    background: white;
+}
+
+.teachers-report-daterange {
+    display: none;
+    flex: 2;
+    min-width: 300px;
+}
+
+.teachers-report-daterange-inner {
+    display: flex;
+    gap: 10px;
+    align-items: end;
+}
+
+.teachers-report-daterange-field {
+    flex: 1;
+}
+
+.teachers-report-generate-btn {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+    box-shadow: 0 4px 6px rgba(240, 147, 251, 0.4);
+    white-space: nowrap;
+}
+
+.teachers-report-generate-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(240, 147, 251, 0.5);
+}
+
+/* Report Summary Cards */
+.teachers-report-summary {
+    display: none;
+    margin-bottom: 25px;
+}
+
+.teachers-report-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.teachers-report-info {
+    background: #f7fafc;
+    padding: 15px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.teachers-report-info-label {
+    color: #4a5568;
+    font-size: 14px;
+}
+
+.teachers-report-info-value {
+    color: #2d3748;
+    font-size: 14px;
+}
+
+.teachers-report-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.teachers-report-btn {
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+}
+
+.teachers-report-btn-export {
+    background: #48bb78;
+    color: white;
+}
+
+.teachers-report-btn-export:hover {
+    background: #38a169;
+}
+
+.teachers-report-btn-print {
+    background: #4299e1;
+    color: white;
+}
+
+.teachers-report-btn-print:hover {
+    background: #3182ce;
+}
+
+.teachers-report-table-container {
+    display: none;
+}
+
+.teachers-report-empty {
+    padding: 60px 20px;
+    text-align: center;
+    color: #a0aec0;
+}
+
+.teachers-report-empty-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+}
+
+.teachers-report-empty-title {
+    color: #4a5568;
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.teachers-report-empty-text {
+    color: #718096;
+    font-size: 14px;
+}
