@@ -15,11 +15,349 @@ from flask import Flask, render_template, jsonify, request
 import sqlite3
 from datetime import datetime, timedelta
 import os
+from flask_mail import Mail, Message
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 app = Flask(__name__)
 
+# Email configuration
+MAIL_SERVER = "smtp.gmail.com"
+MAIL_PORT = 587
+MAIL_USE_TLS = True
+MAIL_USERNAME = "kamalakaramarathi13@gmail.com"
+MAIL_PASSWORD = "tkkj ylhg mszl efnt"
+MAIL_DEFAULT_SENDER = MAIL_USERNAME
+
+app.config['MAIL_SERVER'] = MAIL_SERVER
+app.config['MAIL_PORT'] = MAIL_PORT
+app.config['MAIL_USE_TLS'] = MAIL_USE_TLS
+app.config['MAIL_USERNAME'] = MAIL_USERNAME
+app.config['MAIL_PASSWORD'] = MAIL_PASSWORD
+app.config['MAIL_DEFAULT_SENDER'] = MAIL_DEFAULT_SENDER
+
+mail = Mail(app)
+
 # Database configuration
 DATABASE = 'database.db'
+
+# ============================================
+# EMAIL HELPER FUNCTIONS
+# ============================================
+
+def send_absence_notification(student_name, roll_no, class_name, section, date, parent_email):
+    """Send absence notification email to parent"""
+    try:
+        # Create message
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = '🔔 Absence Notification'
+        msg['From'] = MAIL_DEFAULT_SENDER
+        msg['To'] = parent_email
+        
+        # Format the date
+        formatted_date = datetime.strptime(date, '%Y-%m-%d').strftime('%d/%m/%Y')
+        
+        # Create HTML content
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body {{
+                    font-family: Arial, sans-serif;
+                    line-height: 1.6;
+                    color: #333;
+                    max-width: 600px;
+                    margin: 0 auto;
+                    padding: 20px;
+                }}
+                .header {{
+                    background-color: #5856D6;
+                    color: white;
+                    padding: 20px;
+                    text-align: center;
+                    border-radius: 5px 5px 0 0;
+                }}
+                .content {{
+                    background-color: #f9f9f9;
+                    padding: 30px;
+                    border: 1px solid #ddd;
+                }}
+                .details-box {{
+                    background-color: white;
+                    border: 1px solid #e0e0e0;
+                    border-radius: 5px;
+                    padding: 20px;
+                    margin: 20px 0;
+                }}
+                .details-title {{
+                    color: #5856D6;
+                    font-weight: bold;
+                    margin-bottom: 15px;
+                }}
+                .detail-row {{
+                    margin: 8px 0;
+                    color: #555;
+                }}
+                .footer {{
+                    color: #666;
+                    margin-top: 20px;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h2>🔔 Absence Notification</h2>
+            </div>
+            <div class="content">
+                <p><strong>Dear Parent,</strong></p>
+                
+                <p>This is an automated notification from School Management System.</p>
+                
+                <p>Your child <strong>{student_name}</strong> (Roll No: <strong>{roll_no}</strong>, Class: <strong>{class_name}-{section}</strong>) has been marked <strong>absent</strong> on <strong>{formatted_date}</strong>.</p>
+                
+                <p>If this information is incorrect or if there are any concerns, please contact the school immediately.</p>
+                
+                <div class="details-box">
+                    <div class="details-title">Student Details:</div>
+                    <div class="detail-row">- Name: {student_name}</div>
+                    <div class="detail-row">- Roll No: {roll_no}</div>
+                    <div class="detail-row">- Class: {class_name}-{section}</div>
+                    <div class="detail-row">- Date: {formatted_date}</div>
+                </div>
+                
+                <p>Thank you for your attention.</p>
+                
+                <div class="footer">
+                    <p>Best regards,<br>
+                    <strong>School Management System</strong></p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        # Create plain text version
+        text_content = f"""
+        ABSENCE NOTIFICATION
+        
+        Dear Parent,
+        
+        This is an automated notification from School Management System.
+        
+        Your child {student_name} (Roll No: {roll_no}, Class: {class_name}-{section}) has been marked absent on {formatted_date}.
+        
+        If this information is incorrect or if there are any concerns, please contact the school immediately.
+        
+        Student Details:
+        - Name: {student_name}
+        - Roll No: {roll_no}
+        - Class: {class_name}-{section}
+        - Date: {formatted_date}
+        
+        Thank you for your attention.
+        
+        Best regards,
+        School Management System
+        """
+        
+        # Attach both versions
+        part1 = MIMEText(text_content, 'plain')
+        part2 = MIMEText(html_content, 'html')
+        msg.attach(part1)
+        msg.attach(part2)
+        
+        # Send email using SMTP
+        with smtplib.SMTP(MAIL_SERVER, MAIL_PORT) as server:
+            server.starttls()
+            server.login(MAIL_USERNAME, MAIL_PASSWORD)
+            server.send_message(msg)
+        
+        print(f"✅ Email sent successfully to {parent_email} for {student_name}")
+        return True
+        
+    except Exception as e:
+        print(f"❌ Error sending email to {parent_email}: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
+def send_low_attendance_alert(student_name, roll_no, class_name, section, total_classes, classes_attended, classes_absent, attendance_percentage, parent_email):
+    """Send low attendance alert email to parent"""
+    try:
+        # Create message
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = f'🚨 Low Attendance Alert - {student_name}'
+        msg['From'] = MAIL_DEFAULT_SENDER
+        msg['To'] = parent_email
+        
+        # Create HTML content
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body {{
+                    font-family: Arial, sans-serif;
+                    line-height: 1.6;
+                    color: #333;
+                    max-width: 600px;
+                    margin: 0 auto;
+                    padding: 20px;
+                }}
+                .header {{
+                    background-color: #5856D6;
+                    color: white;
+                    padding: 20px;
+                    text-align: center;
+                    border-radius: 5px 5px 0 0;
+                }}
+                .content {{
+                    background-color: #f9f9f9;
+                    padding: 30px;
+                    border: 1px solid #ddd;
+                }}
+                .summary-box {{
+                    background-color: #FFF9C4;
+                    border-left: 4px solid #FFA000;
+                    border-radius: 5px;
+                    padding: 20px;
+                    margin: 20px 0;
+                }}
+                .summary-title {{
+                    color: #F57C00;
+                    font-weight: bold;
+                    font-size: 18px;
+                    margin-bottom: 15px;
+                }}
+                .summary-item {{
+                    margin: 8px 0;
+                    color: #555;
+                }}
+                .important-notice {{
+                    background-color: #FFEBEE;
+                    border-left: 4px solid #D32F2F;
+                    border-radius: 5px;
+                    padding: 20px;
+                    margin: 20px 0;
+                }}
+                .notice-title {{
+                    color: #C62828;
+                    font-weight: bold;
+                    font-size: 16px;
+                    margin-bottom: 10px;
+                }}
+                .notice-text {{
+                    color: #555;
+                    line-height: 1.8;
+                }}
+                .footer {{
+                    color: #666;
+                    margin-top: 20px;
+                }}
+                .highlight {{
+                    font-weight: bold;
+                    color: #D32F2F;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h2>🚨 Low Attendance Alert</h2>
+            </div>
+            <div class="content">
+                <p><strong>Dear Parent,</strong></p>
+                
+                <p>This is an important attendance update for your child, <strong>{student_name}</strong> (Roll No: <strong>{roll_no}</strong>, Class: <strong>{class_name}-{section}</strong>).</p>
+                
+                <div class="summary-box">
+                    <div class="summary-title">Summary:</div>
+                    <div class="summary-item">• Total classes held: <strong>{total_classes}</strong></div>
+                    <div class="summary-item">• Classes attended: <strong>{classes_attended}</strong></div>
+                    <div class="summary-item">• Classes absent: <strong>{classes_absent}</strong></div>
+                    <div class="summary-item">• Attendance %: <span class="highlight">{attendance_percentage}%</span></div>
+                </div>
+                
+                <div class="important-notice">
+                    <div class="notice-title">Important Notice:</div>
+                    <div class="notice-text">
+                        Your child's attendance is below the required threshold. Please ensure your child attends school regularly to avoid academic consequences. If there are valid reasons (medical or approved leave), notify the school office to mark the absence as excused.
+                    </div>
+                </div>
+                
+                <p>If you have any questions or concerns, please contact the school office immediately.</p>
+                
+                <div class="footer">
+                    <p>Best regards,<br>
+                    <strong>School Management System</strong></p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        # Create plain text version
+        text_content = f"""
+        LOW ATTENDANCE ALERT
+        
+        Dear Parent,
+        
+        This is an important attendance update for your child, {student_name} (Roll No: {roll_no}, Class: {class_name}-{section}).
+        
+        Summary:
+        • Total classes held: {total_classes}
+        • Classes attended: {classes_attended}
+        • Classes absent: {classes_absent}
+        • Attendance %: {attendance_percentage}%
+        
+        Important Notice:
+        Your child's attendance is below the required threshold. Please ensure your child attends school regularly to avoid academic consequences. If there are valid reasons (medical or approved leave), notify the school office to mark the absence as excused.
+        
+        If you have any questions or concerns, please contact the school office immediately.
+        
+        Best regards,
+        School Management System
+        """
+        
+        # Attach both versions
+        part1 = MIMEText(text_content, 'plain')
+        part2 = MIMEText(html_content, 'html')
+        msg.attach(part1)
+        msg.attach(part2)
+        
+        # Send email using SMTP
+        with smtplib.SMTP(MAIL_SERVER, MAIL_PORT) as server:
+            server.starttls()
+            server.login(MAIL_USERNAME, MAIL_PASSWORD)
+            server.send_message(msg)
+        
+        print(f"✅ Low attendance alert sent successfully to {parent_email} for {student_name}")
+        return True
+        
+    except Exception as e:
+        print(f"❌ Error sending low attendance alert to {parent_email}: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
+def log_alert(student_id, alert_type, date, parent_email, message, status):
+    """Log alert to database"""
+    try:
+        conn = get_db_connection()
+        conn.execute(
+            '''INSERT INTO alert_logs (student_id, alert_type, date, parent_email, message, status)
+               VALUES (?, ?, ?, ?, ?, ?)''',
+            (student_id, alert_type, date, parent_email, message, status)
+        )
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        print(f"Error logging alert: {e}")
+        if 'conn' in locals():
+            conn.close()
+        return False
 
 # ============================================
 # DATABASE HELPER FUNCTIONS
@@ -362,7 +700,7 @@ def get_all_students():
     
     try:
         query = '''SELECT student_id, roll_no, name, class, section, email, 
-                         enrollment_date, status
+                         enrollment_date, status, parent_email
                    FROM students
                    WHERE 1=1'''
         params = []
@@ -393,7 +731,8 @@ def get_all_students():
             'section': s['section'],
             'email': s['email'],
             'enrollment_date': s['enrollment_date'],
-            'status': s['status']
+            'status': s['status'],
+            'parent_email': s['parent_email']
         } for s in students]
         
         conn.close()
@@ -419,7 +758,7 @@ def get_all_students():
 
 @app.route('/api/teacher/attendance/save', methods=['POST'])
 def save_attendance():
-    """Save attendance records"""
+    """Save attendance records and send email notifications for absent students"""
     try:
         data = request.json
         
@@ -438,6 +777,9 @@ def save_attendance():
             }), 400
         
         conn = get_db_connection()
+        
+        # Track absent students for email notifications
+        absent_students = []
         
         for record in attendance_records:
             # Validate required fields
@@ -475,13 +817,75 @@ def save_attendance():
                        VALUES (?, ?, ?)''',
                     (record['student_id'], record['date'], db_status)
                 )
+            
+            # If student is absent, get their details for email notification
+            if db_status == 'absent':
+                student_info = conn.execute(
+                    '''SELECT student_id, name, roll_no, class, section, parent_email
+                       FROM students
+                       WHERE student_id = ?''',
+                    (record['student_id'],)
+                ).fetchone()
+                
+                if student_info and student_info['parent_email']:
+                    absent_students.append({
+                        'student_id': student_info['student_id'],
+                        'name': student_info['name'],
+                        'roll_no': student_info['roll_no'],
+                        'class': student_info['class'],
+                        'section': student_info['section'],
+                        'parent_email': student_info['parent_email'],
+                        'date': record['date']
+                    })
         
         conn.commit()
         conn.close()
         
+        # Send email notifications to parents of absent students
+        emails_sent = 0
+        emails_failed = 0
+        
+        for student in absent_students:
+            try:
+                success = send_absence_notification(
+                    student['name'],
+                    student['roll_no'],
+                    student['class'],
+                    student['section'],
+                    student['date'],
+                    student['parent_email']
+                )
+                
+                # Log the alert
+                message = f"Absence notification for {student['name']} on {student['date']}"
+                log_alert(
+                    student['student_id'],
+                    'absence',
+                    student['date'],
+                    student['parent_email'],
+                    message,
+                    'sent' if success else 'failed'
+                )
+                
+                if success:
+                    emails_sent += 1
+                else:
+                    emails_failed += 1
+            except Exception as email_error:
+                print(f"Failed to send email for {student['name']}: {email_error}")
+                emails_failed += 1
+        
+        message = f'Attendance saved successfully for {len(attendance_records)} students'
+        if emails_sent > 0:
+            message += f'. {emails_sent} absence notification(s) sent to parents'
+        if emails_failed > 0:
+            message += f'. {emails_failed} email(s) failed to send'
+        
         return jsonify({
             'success': True,
-            'message': f'Attendance saved successfully for {len(attendance_records)} students'
+            'message': message,
+            'emails_sent': emails_sent,
+            'emails_failed': emails_failed
         })
         
     except Exception as e:
@@ -672,7 +1076,7 @@ def get_low_attendance():
     conn = get_db_connection()
     
     try:
-        query = 'SELECT student_id, name, class, section FROM students WHERE 1=1'
+        query = 'SELECT student_id, roll_no, name, class, section FROM students WHERE 1=1'
         params = []
         
         if class_name:
@@ -705,6 +1109,7 @@ def get_low_attendance():
                 if percentage < threshold:
                     low_attendance_students.append({
                         'student_id': student['student_id'],
+                        'roll_no': student['roll_no'],
                         'name': student['name'],
                         'class': student['class'],
                         'section': student['section'],
@@ -732,65 +1137,230 @@ def get_low_attendance():
         }), 500
 
 # ============================================
+# API ROUTE: SEND LOW ATTENDANCE ALERTS
+# ============================================
+
+@app.route('/api/teacher/attendance/low/notify', methods=['POST'])
+def send_low_attendance_notifications():
+    """Send low attendance alert emails to parents"""
+    try:
+        data = request.json
+        
+        if not data or 'students' not in data:
+            return jsonify({
+                'success': False,
+                'error': 'No student data provided'
+            }), 400
+        
+        students = data.get('students', [])
+        
+        if not students:
+            return jsonify({
+                'success': False,
+                'error': 'No students to notify'
+            }), 400
+        
+        conn = get_db_connection()
+        
+        emails_sent = 0
+        emails_failed = 0
+        results = []
+        
+        for student_data in students:
+            try:
+                student_id = student_data.get('student_id')
+                
+                # Get student details including parent email and roll_no
+                student = conn.execute(
+                    '''SELECT name, roll_no, class, section, parent_email
+                       FROM students
+                       WHERE student_id = ?''',
+                    (student_id,)
+                ).fetchone()
+                
+                if not student:
+                    results.append({
+                        'student_id': student_id,
+                        'status': 'failed',
+                        'message': 'Student not found'
+                    })
+                    emails_failed += 1
+                    continue
+                
+                if not student['parent_email']:
+                    results.append({
+                        'student_id': student_id,
+                        'name': student['name'],
+                        'status': 'failed',
+                        'message': 'No parent email on file'
+                    })
+                    emails_failed += 1
+                    continue
+                
+                # Send low attendance alert
+                success = send_low_attendance_alert(
+                    student['name'],
+                    student['roll_no'],
+                    student['class'],
+                    student['section'],
+                    student_data.get('total_days', 0),
+                    student_data.get('present', 0),
+                    student_data.get('absent', 0),
+                    student_data.get('percentage', 0),
+                    student['parent_email']
+                )
+                
+                # Log the alert
+                message = f"Low attendance alert: {student_data.get('percentage', 0)}% attendance"
+                log_alert(
+                    student_id,
+                    'low_attendance',
+                    datetime.now().strftime('%Y-%m-%d'),
+                    student['parent_email'],
+                    message,
+                    'sent' if success else 'failed'
+                )
+                
+                if success:
+                    results.append({
+                        'student_id': student_id,
+                        'name': student['name'],
+                        'status': 'sent',
+                        'email': student['parent_email']
+                    })
+                    emails_sent += 1
+                else:
+                    results.append({
+                        'student_id': student_id,
+                        'name': student['name'],
+                        'status': 'failed',
+                        'message': 'Email delivery failed'
+                    })
+                    emails_failed += 1
+                    
+            except Exception as e:
+                print(f"Error processing student {student_data.get('student_id')}: {e}")
+                results.append({
+                    'student_id': student_data.get('student_id'),
+                    'status': 'failed',
+                    'message': str(e)
+                })
+                emails_failed += 1
+        
+        conn.close()
+        
+        message = f'Processed {len(students)} students: {emails_sent} alerts sent'
+        if emails_failed > 0:
+            message += f', {emails_failed} failed'
+        
+        return jsonify({
+            'success': True,
+            'message': message,
+            'emails_sent': emails_sent,
+            'emails_failed': emails_failed,
+            'results': results
+        })
+        
+    except Exception as e:
+        print(f"Error in send_low_attendance_notifications: {e}")
+        import traceback
+        traceback.print_exc()
+        if 'conn' in locals():
+            conn.close()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+# ============================================
 # API ROUTE: ALERT LOGS
 # ============================================
 
 @app.route('/api/teacher/alert-logs')
 def get_alert_logs():
-    """Get parent alert logs (simulated)"""
+    """Get parent alert logs from database"""
     
-    # Sample alert logs data
-    sample_logs = [
-        {
-            'date': '02/01/2026',
-            'student_name': 'Amit Kumar',
-            'roll_no': '103',
-            'class': '10',
-            'section': 'A',
-            'parent_contact': '9876543212',
-            'parent_email': 'kamalakara2005@gmail.com',
-            'message': 'Dear Parent, Your child Amit Kumar (Roll No: 103, Class: 10-A) has been marked absent today (02/01/2026). If this information is incorrect, please contact the school immediately.',
-            'status': 'SENT'
-        },
-        {
-            'date': '12/12/2025',
-            'student_name': 'Kamalakara',
-            'roll_no': '111',
-            'class': '10',
-            'section': 'A',
-            'parent_contact': '8431521612',
-            'parent_email': 'vivek.tr2023@gmail.com',
-            'message': 'Dear Parent, Your child Kamalakara (Roll No: 111, Class: 10-A) has been marked absent today (12/12/2025). If this information is incorrect, please contact the school immediately.',
-            'status': 'SENT'
-        },
-        {
-            'date': '12/12/2025',
-            'student_name': 'Amit Kumar',
-            'roll_no': '103',
-            'class': '10',
-            'section': 'A',
-            'parent_contact': '9876543212',
-            'parent_email': 'kamalakara2005@gmail.com',
-            'message': 'Dear Parent, Your child Amit Kumar (Roll No: 103, Class: 10-A) has been marked absent today (12/12/2025). If this information is incorrect, please contact the school immediately.',
-            'status': 'SENT'
-        },
-        {
-            'date': '10/12/2025',
-            'student_name': 'Amit Kumar',
-            'roll_no': '103',
-            'class': '10',
-            'section': 'A',
-            'parent_contact': '9876543212',
-            'parent_email': 'kamalakara2005@gmail.com',
-            'message': 'Dear Parent, Your child Amit Kumar (Roll No: 103, Class: 10-A) has been marked absent today (10/12/2025). If this information is incorrect, please contact the school immediately.',
-            'status': 'SENT'
-        }
-    ]
-    
-    return jsonify({
-        'success': True,
-        'logs': sample_logs
-    })
+    try:
+        conn = get_db_connection()
+        
+        # Get alert logs with student information
+        logs = conn.execute(
+            '''SELECT 
+                al.log_id,
+                al.alert_type,
+                al.date,
+                al.parent_email,
+                al.message,
+                al.status,
+                al.sent_at,
+                s.student_id,
+                s.roll_no,
+                s.name,
+                s.class,
+                s.section
+               FROM alert_logs al
+               JOIN students s ON al.student_id = s.student_id
+               ORDER BY al.sent_at DESC
+               LIMIT 100'''
+        ).fetchall()
+        
+        conn.close()
+        
+        # Format logs for display
+        formatted_logs = []
+        for log in logs:
+            # Format date
+            try:
+                log_date = datetime.strptime(log['date'], '%Y-%m-%d').strftime('%m/%d/%Y')
+            except:
+                log_date = log['date']
+            
+            # Format sent_at timestamp
+            try:
+                sent_time = datetime.strptime(log['sent_at'], '%Y-%m-%d %H:%M:%S').strftime('%m/%d/%Y %I:%M %p')
+            except:
+                sent_time = log['sent_at']
+            
+            # Determine channel based on alert type
+            channel = 'Email'
+            
+            # Create display message
+            if log['alert_type'] == 'absence':
+                display_message = f"Absence notification for {log['name']} on {log_date}"
+            else:
+                display_message = f"Low attendance alert: {log['message']}"
+            
+            formatted_logs.append({
+                'date': sent_time,
+                'student_name': log['name'],
+                'roll_no': log['roll_no'],
+                'class': log['class'].replace('Class ', ''),
+                'section': log['section'],
+                'parent_contact': '',  # Not stored
+                'parent_email': log['parent_email'],
+                'channel': channel,
+                'message': display_message,
+                'status': log['status'].upper(),
+                'alert_type': log['alert_type']
+            })
+        
+        return jsonify({
+            'success': True,
+            'logs': formatted_logs
+        })
+        
+    except Exception as e:
+        print(f"Error fetching alert logs: {e}")
+        import traceback
+        traceback.print_exc()
+        if 'conn' in locals():
+            conn.close()
+        
+        # Return empty logs on error
+        return jsonify({
+            'success': True,
+            'logs': []
+        })
 
 # ============================================
 # API ROUTE: FEES DATA
@@ -1940,6 +2510,126 @@ def teacher_attendance_report():
                 'attendance_percentage': overall_percentage
             },
             'teachers': list(teacher_report.values())
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+# ============================================
+# API ROUTE: SEND MESSAGE
+# ============================================
+
+@app.route('/api/teacher/messages/send', methods=['POST'])
+def send_teacher_message():
+    """Send message to student or parent via email"""
+    try:
+        data = request.get_json()
+        
+        recipient_type = data.get('recipient_type')  # 'student' or 'parent'
+        student_id = data.get('recipient')
+        subject = data.get('subject')
+        body = data.get('body')
+        priority = data.get('priority', 'normal')
+        
+        if not all([recipient_type, student_id, subject, body]):
+            return jsonify({
+                'success': False,
+                'error': 'Missing required fields'
+            }), 400
+        
+        conn = get_db_connection()
+        
+        # Get student and parent email
+        student = conn.execute(
+            'SELECT name, email, parent_email FROM students WHERE student_id = ?',
+            (student_id,)
+        ).fetchone()
+        
+        conn.close()
+        
+        if not student:
+            return jsonify({
+                'success': False,
+                'error': 'Student not found'
+            }), 404
+        
+        # Determine recipient email based on type
+        if recipient_type == 'student':
+            recipient_email = student['email']
+            recipient_name = student['name']
+        elif recipient_type == 'parent':
+            if not student['parent_email']:
+                return jsonify({
+                    'success': False,
+                    'error': f"No parent email found for {student['name']}"
+                }), 400
+            recipient_email = student['parent_email']
+            recipient_name = f"Parent of {student['name']}"
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Invalid recipient type'
+            }), 400
+        
+        # Send email
+        priority_text = ''
+        if priority == 'high':
+            priority_text = '[HIGH PRIORITY] '
+        
+        msg = Message(
+            subject=f"{priority_text}{subject}",
+            sender=app.config['MAIL_DEFAULT_SENDER'],
+            recipients=[recipient_email]
+        )
+        
+        # HTML email template
+        msg.html = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                .header {{ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                          color: white; padding: 20px; border-radius: 8px 8px 0 0; }}
+                .content {{ background: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px; }}
+                .priority-high {{ background: #ef4444; color: white; padding: 10px; 
+                                 margin-bottom: 20px; border-radius: 4px; }}
+                .footer {{ margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd; 
+                          font-size: 12px; color: #666; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h2>🎓 School Management System</h2>
+                    <p>Message from Teacher</p>
+                </div>
+                <div class="content">
+                    {'<div class="priority-high"><strong>⚠️ HIGH PRIORITY MESSAGE</strong></div>' if priority == 'high' else ''}
+                    <p><strong>Dear {recipient_name},</strong></p>
+                    <div style="background: white; padding: 20px; border-left: 4px solid #667eea; margin: 20px 0;">
+                        {body.replace(chr(10), '<br>')}
+                    </div>
+                    <div class="footer">
+                        <p>This is an automated message from the School Management System.</p>
+                        <p>Please do not reply to this email.</p>
+                    </div>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        mail.send(msg)
+        
+        return jsonify({
+            'success': True,
+            'message': f'Message sent successfully to {recipient_name}',
+            'recipient_email': recipient_email
         }), 200
         
     except Exception as e:

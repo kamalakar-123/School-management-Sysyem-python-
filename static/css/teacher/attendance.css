@@ -1342,3 +1342,107 @@ input[type="radio"]:checked + .status-leave {
         grid-template-columns: repeat(2, 1fr);
     }
 }
+
+/* ACTION BUTTON */
+.action-btn {
+    background: #5b6cf0;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.3s;
+}
+
+.action-btn:hover {
+    background: #4c51bf;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(91, 108, 240, 0.3);
+}
+
+.action-btn:disabled {
+    background: #cbd5e0;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.action-btn i.fa-spinner {
+    animation: spin 1s linear infinite;
+}
+
+/* INFORM ALL BUTTON */
+.inform-all-btn {
+    background: linear-gradient(135deg, #f56565 0%, #c53030 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+    box-shadow: 0 4px 12px rgba(245, 101, 101, 0.3);
+}
+
+.inform-all-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(245, 101, 101, 0.4);
+}
+
+.inform-all-btn i {
+    font-size: 16px;
+}
+
+/* TOAST NOTIFICATIONS */
+.toast {
+    position: fixed;
+    top: 20px;
+    right: -400px;
+    background: white;
+    padding: 16px 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 300px;
+    max-width: 400px;
+    z-index: 10000;
+    transition: right 0.3s ease-in-out;
+}
+
+.toast.show {
+    right: 20px;
+}
+
+.toast-success {
+    border-left: 4px solid #48bb78;
+}
+
+.toast-success i {
+    color: #48bb78;
+    font-size: 20px;
+}
+
+.toast-error {
+    border-left: 4px solid #f56565;
+}
+
+.toast-error i {
+    color: #f56565;
+    font-size: 20px;
+}
+
+.toast span {
+    color: #2d3748;
+    font-weight: 500;
+    font-size: 14px;
+}

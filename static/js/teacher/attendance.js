@@ -548,13 +548,21 @@ function displayLowAttendance(students, threshold) {
         return;
     }
     
+    // Store students data globally for later use
+    window.lowAttendanceStudents = students;
+    
     resultsDiv.innerHTML = `
         <div class="alert-banner">
             <i class="fas fa-exclamation-triangle"></i>
             <p>${students.length} student(s) found with attendance below ${threshold}%</p>
         </div>
         
-        <h3>Students Below ${threshold}% Attendance</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin: 20px 0;">
+            <h3>Students Below ${threshold}% Attendance</h3>
+            <button class="inform-all-btn" onclick="informAllParents()">
+                <i class="fas fa-paper-plane"></i> Inform All Parents
+            </button>
+        </div>
         
         <div class="table-container">
             <table class="attendance-table">
@@ -574,8 +582,8 @@ function displayLowAttendance(students, threshold) {
                 </thead>
                 <tbody>
                     ${students.map(student => `
-                        <tr>
-                            <td>${student.student_id}</td>
+                        <tr id="student-row-${student.student_id}">
+                            <td>${student.roll_no || student.student_id}</td>
                             <td>${student.name}</td>
                             <td>${student.class}</td>
                             <td>${student.section || 'A'}</td>
@@ -587,9 +595,9 @@ function displayLowAttendance(students, threshold) {
                                 <span class="status-badge critical">CRITICAL</span>
                             </td>
                             <td>
-                                <a href="#" class="action-link" onclick="informParent(${student.student_id})">
+                                <button class="action-btn" id="btn-${student.student_id}" onclick="informParent(${student.student_id})">
                                     <i class="fas fa-paper-plane"></i> Inform Parents
-                                </a>
+                                </button>
                             </td>
                         </tr>
                     `).join('')}
@@ -599,7 +607,126 @@ function displayLowAttendance(students, threshold) {
     `;
 }
 
-function informParent(studentId) {
+async function informParent(studentId) {
+    const student = window.lowAttendanceStudents?.find(s => s.student_id === studentId);
+    if (!student) {
+        alert('Student data not found');
+        return false;
+    }
+    
+    const btn = document.getElementById(`btn-${studentId}`);
+    const originalContent = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+    
+    try {
+        const response = await fetch('/api/teacher/attendance/low/notify', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                students: [student]
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success && data.emails_sent > 0) {
+            btn.innerHTML = '<i class="fas fa-check"></i> Sent';
+            btn.style.background = '#48bb78';
+            showToast('success', `Low attendance alert sent to parent of ${student.name}`);
+        } else {
+            btn.disabled = false;
+            btn.innerHTML = originalContent;
+            const errorMsg = data.results?.[0]?.message || 'Failed to send email';
+            showToast('error', errorMsg);
+        }
+    } catch (error) {
+        console.error('Error sending notification:', error);
+        btn.disabled = false;
+        btn.innerHTML = originalContent;
+        showToast('error', 'Failed to send notification. Please try again.');
+    }
+    
+    return false;
+}
+
+async function informAllParents() {
+    if (!window.lowAttendanceStudents || window.lowAttendanceStudents.length === 0) {
+        alert('No students to notify');
+        return;
+    }
+    
+    const confirmMsg = `Send low attendance alerts to ${window.lowAttendanceStudents.length} parent(s)?`;
+    if (!confirm(confirmMsg)) {
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const response = await fetch('/api/teacher/attendance/low/notify', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                students: window.lowAttendanceStudents
+            })
+        });
+        
+        const data = await response.json();
+        
+        hideLoading();
+        
+        if (data.success) {
+            showToast('success', data.message);
+            
+            // Update button states for successfully sent emails
+            data.results?.forEach(result => {
+                if (result.status === 'sent') {
+                    const btn = document.getElementById(`btn-${result.student_id}`);
+                    if (btn) {
+                        btn.innerHTML = '<i class="fas fa-check"></i> Sent';
+                        btn.style.background = '#48bb78';
+                        btn.disabled = true;
+                    }
+                }
+            });
+        } else {
+            showToast('error', data.error || 'Failed to send notifications');
+        }
+    } catch (error) {
+        hideLoading();
+        console.error('Error sending notifications:', error);
+        showToast('error', 'Failed to send notifications. Please try again.');
+    }
+}
+
+function showToast(type, message) {
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+        <span>${message}</span>
+    `;
+    
+    // Add to body
+    document.body.appendChild(toast);
+    
+    // Show toast
+    setTimeout(() => toast.classList.add('show'), 100);
+    
+    // Hide and remove toast
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 4000);
+}
+
+function informParent_old(studentId) {
     alert(`Parent notification sent for student ID: ${studentId}`);
     return false;
 }

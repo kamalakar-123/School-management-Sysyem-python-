@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS students (
     class TEXT NOT NULL,
     section TEXT NOT NULL,
     email TEXT NOT NULL,
+    parent_email TEXT,
     enrollment_date DATE DEFAULT CURRENT_DATE,
     status TEXT DEFAULT 'active'
 );
@@ -93,42 +94,55 @@ CREATE TABLE IF NOT EXISTS performance (
     FOREIGN KEY (exam_id) REFERENCES exams(exam_id)
 );
 
+-- Alert Logs Table (Stores parent notification logs)
+CREATE TABLE IF NOT EXISTS alert_logs (
+    log_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    student_id INTEGER NOT NULL,
+    alert_type TEXT NOT NULL CHECK(alert_type IN ('absence', 'low_attendance')),
+    date DATE NOT NULL,
+    parent_email TEXT NOT NULL,
+    message TEXT NOT NULL,
+    status TEXT NOT NULL CHECK(status IN ('sent', 'failed')),
+    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (student_id) REFERENCES students(student_id)
+);
+
 -- ============================================
 -- SAMPLE DATA FOR DEMONSTRATION
 -- ============================================
 
 -- Insert Sample Students (30 students with roll numbers and emails)
-INSERT INTO students (roll_no, name, class, section, email) VALUES
-('10A001', 'Rahul Sharma', 'Class 10', 'A', 'rahul.sharma@school.edu'),
-('10A002', 'Priya Patel', 'Class 10', 'A', 'priya.patel@school.edu'),
-('10A003', 'Arjun Nair', 'Class 10', 'A', 'arjun.nair@school.edu'),
-('10A004', 'Aditya Bhat', 'Class 10', 'A', 'aditya.bhat@school.edu'),
-('10A005', 'Meera Singh', 'Class 10', 'A', 'meera.singh@school.edu'),
-('10B001', 'Amit Kumar', 'Class 10', 'B', 'amit.kumar@school.edu'),
-('10B002', 'Karan Kapoor', 'Class 10', 'B', 'karan.kapoor@school.edu'),
-('10B003', 'Tanvi Agarwal', 'Class 10', 'B', 'tanvi.agarwal@school.edu'),
-('10B004', 'Rohan Desai', 'Class 10', 'B', 'rohan.desai@school.edu'),
-('10B005', 'Ishita Verma', 'Class 10', 'B', 'ishita.verma@school.edu'),
-('9A001', 'Sneha Reddy', 'Class 9', 'A', 'sneha.reddy@school.edu'),
-('9A002', 'Divya Iyer', 'Class 9', 'A', 'divya.iyer@school.edu'),
-('9A003', 'Riya Shah', 'Class 9', 'A', 'riya.shah@school.edu'),
-('9A004', 'Harsh Malhotra', 'Class 9', 'A', 'harsh.malhotra@school.edu'),
-('9A005', 'Ananya Gupta', 'Class 9', 'A', 'ananya.gupta@school.edu'),
-('9B001', 'Vikram Singh', 'Class 9', 'B', 'vikram.singh@school.edu'),
-('9B002', 'Siddharth Roy', 'Class 9', 'B', 'siddharth.roy@school.edu'),
-('9B003', 'Nisha Jain', 'Class 9', 'B', 'nisha.jain@school.edu'),
-('9B004', 'Kabir Sharma', 'Class 9', 'B', 'kabir.sharma@school.edu'),
-('9B005', 'Lavanya Nair', 'Class 9', 'B', 'lavanya.nair@school.edu'),
-('8A001', 'Anjali Verma', 'Class 8', 'A', 'anjali.verma@school.edu'),
-('8A002', 'Neha Gupta', 'Class 8', 'A', 'neha.gupta@school.edu'),
-('8A003', 'Dev Patel', 'Class 8', 'A', 'dev.patel@school.edu'),
-('8A004', 'Tara Kumar', 'Class 8', 'A', 'tara.kumar@school.edu'),
-('8B001', 'Rohit Mehta', 'Class 8', 'B', 'rohit.mehta@school.edu'),
-('8B002', 'Manish Pillai', 'Class 8', 'B', 'manish.pillai@school.edu'),
-('8B003', 'Sanya Singh', 'Class 8', 'B', 'sanya.singh@school.edu'),
-('7A001', 'Kavya Joshi', 'Class 7', 'A', 'kavya.joshi@school.edu'),
-('7A002', 'Pooja Desai', 'Class 7', 'A', 'pooja.desai@school.edu'),
-('7A003', 'Megha Srinivas', 'Class 7', 'A', 'megha.srinivas@school.edu');
+INSERT INTO students (roll_no, name, class, section, email, parent_email) VALUES
+('10A001', 'Rahul Sharma', 'Class 10', 'A', 'rahul.sharma@school.edu', 'gm8432419@gmail.com'),
+('10A002', 'Priya Patel', 'Class 10', 'A', 'priya.patel@school.edu', NULL),
+('10A003', 'Arjun Nair', 'Class 10', 'A', 'arjun.nair@school.edu', NULL),
+('10A004', 'Aditya Bhat', 'Class 10', 'A', 'aditya.bhat@school.edu', NULL),
+('10A005', 'Meera Singh', 'Class 10', 'A', 'meera.singh@school.edu', NULL),
+('10B001', 'Amit Kumar', 'Class 10', 'B', 'amit.kumar@school.edu', NULL),
+('10B002', 'Karan Kapoor', 'Class 10', 'B', 'karan.kapoor@school.edu', NULL),
+('10B003', 'Tanvi Agarwal', 'Class 10', 'B', 'tanvi.agarwal@school.edu', NULL),
+('10B004', 'Rohan Desai', 'Class 10', 'B', 'rohan.desai@school.edu', NULL),
+('10B005', 'Ishita Verma', 'Class 10', 'B', 'ishita.verma@school.edu', NULL),
+('9A001', 'Sneha Reddy', 'Class 9', 'A', 'sneha.reddy@school.edu', NULL),
+('9A002', 'Divya Iyer', 'Class 9', 'A', 'divya.iyer@school.edu', NULL),
+('9A003', 'Riya Shah', 'Class 9', 'A', 'riya.shah@school.edu', NULL),
+('9A004', 'Harsh Malhotra', 'Class 9', 'A', 'harsh.malhotra@school.edu', NULL),
+('9A005', 'Ananya Gupta', 'Class 9', 'A', 'ananya.gupta@school.edu', NULL),
+('9B001', 'Vikram Singh', 'Class 9', 'B', 'vikram.singh@school.edu', NULL),
+('9B002', 'Siddharth Roy', 'Class 9', 'B', 'siddharth.roy@school.edu', NULL),
+('9B003', 'Nisha Jain', 'Class 9', 'B', 'nisha.jain@school.edu', NULL),
+('9B004', 'Kabir Sharma', 'Class 9', 'B', 'kabir.sharma@school.edu', NULL),
+('9B005', 'Lavanya Nair', 'Class 9', 'B', 'lavanya.nair@school.edu', NULL),
+('8A001', 'Anjali Verma', 'Class 8', 'A', 'anjali.verma@school.edu', NULL),
+('8A002', 'Neha Gupta', 'Class 8', 'A', 'neha.gupta@school.edu', NULL),
+('8A003', 'Dev Patel', 'Class 8', 'A', 'dev.patel@school.edu', NULL),
+('8A004', 'Tara Kumar', 'Class 8', 'A', 'tara.kumar@school.edu', NULL),
+('8B001', 'Rohit Mehta', 'Class 8', 'B', 'rohit.mehta@school.edu', NULL),
+('8B002', 'Manish Pillai', 'Class 8', 'B', 'manish.pillai@school.edu', NULL),
+('8B003', 'Sanya Singh', 'Class 8', 'B', 'sanya.singh@school.edu', NULL),
+('7A001', 'Kavya Joshi', 'Class 7', 'A', 'kavya.joshi@school.edu', NULL),
+('7A002', 'Pooja Desai', 'Class 7', 'A', 'pooja.desai@school.edu', NULL),
+('7A003', 'Megha Srinivas', 'Class 7', 'A', 'megha.srinivas@school.edu', NULL);
 
 -- Insert Sample Teachers
 INSERT INTO teachers (name, subject, department, joining_date) VALUES

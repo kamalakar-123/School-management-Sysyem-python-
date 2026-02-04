@@ -122,6 +122,9 @@ function hideRecipientGroups() {
     document.getElementById('classSelectGroup').style.display = 'none';
 }
 
+// Flag to track if event listeners are already attached
+let studentsEventListenersAttached = false;
+
 // Load classes and students for modal
 function loadClassesAndStudents() {
     fetch('/api/teacher/classes')
@@ -145,24 +148,97 @@ function loadClassesAndStudents() {
         })
         .catch(error => console.error('Error loading classes:', error));
 
-    // Load students (sample data)
-    const students = [
-        { id: 1, name: 'John Doe', rollNo: '101' },
-        { id: 2, name: 'Jane Smith', rollNo: '102' },
-        { id: 3, name: 'Mike Johnson', rollNo: '103' }
-    ];
-
-    const studentSelect = document.getElementById('messageStudent');
-    while (studentSelect.options.length > 1) {
-        studentSelect.remove(1);
+    // Load all students with search and filter capabilities
+    loadAllStudents();
+    
+    // Add search and filter event listeners (only once)
+    if (!studentsEventListenersAttached) {
+        const searchInput = document.getElementById('studentSearchInput');
+        const classFilter = document.getElementById('studentClassFilter');
+        
+        if (searchInput) {
+            searchInput.addEventListener('input', loadAllStudents);
+        }
+        
+        if (classFilter) {
+            classFilter.addEventListener('change', loadAllStudents);
+        }
+        
+        studentsEventListenersAttached = true;
     }
+}
 
-    students.forEach(student => {
-        const option = document.createElement('option');
-        option.value = student.id;
-        option.textContent = `${student.name} (${student.rollNo})`;
-        studentSelect.appendChild(option);
-    });
+// Load all students with search and filter
+function loadAllStudents() {
+    const searchInput = document.getElementById('studentSearchInput');
+    const classFilter = document.getElementById('studentClassFilter');
+    const studentSelect = document.getElementById('messageStudent');
+    
+    if (!studentSelect) {
+        console.error('Student select element not found!');
+        return;
+    }
+    
+    const searchValue = searchInput ? searchInput.value : '';
+    const classValue = classFilter ? classFilter.value : '';
+    
+    // Build query parameters
+    let url = '/api/teacher/students/all?';
+    if (searchValue) {
+        url += `search=${encodeURIComponent(searchValue)}&`;
+    }
+    if (classValue) {
+        // Parse class and section from format "Class 10|A"
+        const parts = classValue.split('|');
+        if (parts.length === 2) {
+            url += `class=${encodeURIComponent(parts[0])}&`;
+            url += `section=${encodeURIComponent(parts[1])}&`;
+        }
+    }
+    
+    console.log('Loading students from:', url);
+    
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Students loaded:', data.total);
+            
+            // Clear existing options
+            studentSelect.innerHTML = '';
+            
+            if (data.success && data.students && data.students.length > 0) {
+                data.students.forEach(student => {
+                    const option = document.createElement('option');
+                    option.value = student.student_id;
+                    // Store both student and parent email as data attributes
+                    option.setAttribute('data-student-email', student.email || '');
+                    option.setAttribute('data-parent-email', student.parent_email || '');
+                    option.setAttribute('data-student-name', student.name || '');
+                    option.textContent = `${student.name} - ${student.class} ${student.section} (${student.roll_no || student.student_id})`;
+                    studentSelect.appendChild(option);
+                });
+                
+                // Show count
+                const countInfo = document.createElement('option');
+                countInfo.disabled = true;
+                countInfo.textContent = `─── ${data.students.length} student(s) found ───`;
+                studentSelect.insertBefore(countInfo, studentSelect.firstChild);
+            } else {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = 'No students found';
+                studentSelect.appendChild(option);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading students:', error);
+            studentSelect.innerHTML = '<option value="">Error loading students. Check console.</option>';
+        });
 }
 
 // Load inbox messages
@@ -304,14 +380,39 @@ function sendMessage() {
     const priority = document.querySelector('input[name="priority"]:checked').value;
     
     let recipient = '';
+    let recipientEmail = '';
+    
     if (recipientType === 'student' || recipientType === 'parent') {
-        recipient = document.getElementById('messageStudent').value;
+        const studentSelect = document.getElementById('messageStudent');
+        recipient = studentSelect.value;
+        
+        if (!recipient) {
+            alert('⚠️ Please select a student');
+            return;
+        }
+        
+        // Get the selected option to access data attributes
+        const selectedOption = studentSelect.options[studentSelect.selectedIndex];
+        
+        // Get appropriate email based on recipient type
+        if (recipientType === 'student') {
+            recipientEmail = selectedOption.getAttribute('data-student-email');
+        } else if (recipientType === 'parent') {
+            recipientEmail = selectedOption.getAttribute('data-parent-email');
+            
+            if (!recipientEmail) {
+                const studentName = selectedOption.getAttribute('data-student-name');
+                alert(`❌ No parent email found for ${studentName}. Please add parent email first.`);
+                return;
+            }
+        }
+        
     } else if (recipientType === 'class') {
         recipient = document.getElementById('messageClass').value;
     }
     
     if (!recipientType || !recipient || !subject || !body) {
-        alert('Please fill in all required fields');
+        alert('⚠️ Please fill in all required fields');
         return;
     }
     
@@ -324,12 +425,43 @@ function sendMessage() {
     };
     
     console.log('Sending message:', data);
-    alert('✅ Message sent successfully!');
     
-    // Close modal and reset
-    document.getElementById('composeMessageModal').classList.remove('show');
-    document.getElementById('composeMessageForm').reset();
-    hideRecipientGroups();
+    // Show loading state
+    const submitBtn = document.querySelector('#composeMessageForm button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+    
+    // Send to backend
+    fetch('/api/teacher/messages/send', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+        
+        if (result.success) {
+            alert(`✅ ${result.message}\nEmail sent to: ${result.recipient_email}`);
+            
+            // Close modal and reset
+            document.getElementById('composeMessageModal').classList.remove('show');
+            document.getElementById('composeMessageForm').reset();
+            hideRecipientGroups();
+        } else {
+            alert(`❌ Error: ${result.error}`);
+        }
+    })
+    .catch(error => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+        console.error('Error sending message:', error);
+        alert('❌ Failed to send message. Please check console for details.');
+    });
 }
 
 // Save as draft

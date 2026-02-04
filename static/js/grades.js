@@ -62,8 +62,8 @@ function loadClassesForFilters() {
                 if (data.classes && data.classes.length > 0) {
                     data.classes.forEach(cls => {
                         const option = document.createElement('option');
-                        option.value = cls.class_id;
-                        option.textContent = `Class ${cls.grade} - ${cls.section}`;
+                        option.value = cls.class_name;  // Use class_name as value
+                        option.textContent = cls.class_name;  // Display class_name
                         select.appendChild(option);
                     });
                 }

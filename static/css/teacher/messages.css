@@ -505,6 +505,72 @@ body {
     min-height: 150px;
 }
 
+/* Student Search Container */
+.student-search-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.search-filters {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 10px;
+}
+
+.student-search-container .search-box {
+    position: relative;
+    flex: 1;
+}
+
+.student-search-container .search-box i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+}
+
+.student-search-container .search-box input {
+    padding-left: 40px;
+    width: 100%;
+}
+
+.class-filter select {
+    width: 100%;
+}
+
+.student-search-container select[size] {
+    min-height: 200px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 8px;
+}
+
+.student-search-container select[size] option {
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-bottom: 4px;
+}
+
+.student-search-container select[size] option:hover {
+    background: rgba(91, 108, 240, 0.1);
+}
+
+.student-search-container select[size] option:checked {
+    background: #5b6cf0;
+    color: white;
+}
+
+.student-search-container select[size] option:disabled {
+    background: #f3f4f6;
+    color: #6b7280;
+    font-weight: 600;
+    text-align: center;
+    cursor: default;
+}
+
 .priority-options {
     display: flex;
     gap: 20px;

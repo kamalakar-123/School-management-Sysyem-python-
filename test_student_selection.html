@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Student Selection</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 8px; box-sizing: border-box; }
+        select[size] { min-height: 200px; }
+        .search-filters { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .log { background: #f0f0f0; padding: 10px; margin-top: 20px; max-height: 200px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Student Selection</h1>
+        
+        <div class="form-group">
+            <label>Select Student</label>
+            
+            <div class="search-filters">
+                <input type="text" id="studentSearchInput" placeholder="Search by name or roll number...">
+                <select id="studentClassFilter">
+                    <option value="">All Classes</option>
+                    <option value="Class 10">Class 10</option>
+                    <option value="Class 9">Class 9</option>
+                    <option value="Class 8">Class 8</option>
+                    <option value="Class 7">Class 7</option>
+                </select>
+            </div>
+            
+            <select id="messageStudent" size="10">
+                <option value="">Loading...</option>
+            </select>
+        </div>
+        
+        <div class="log" id="log">
+            <strong>Console Log:</strong><br>
+        </div>
+    </div>
+    
+    <script>
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            logDiv.innerHTML += message + '<br>';
+            console.log(message);
+        }
+        
+        function loadAllStudents() {
+            const searchInput = document.getElementById('studentSearchInput');
+            const classFilter = document.getElementById('studentClassFilter');
+            const studentSelect = document.getElementById('messageStudent');
+            
+            if (!studentSelect) {
+                log('❌ ERROR: Student select element not found!');
+                return;
+            }
+            
+            const searchValue = searchInput ? searchInput.value : '';
+            const classValue = classFilter ? classFilter.value : '';
+            
+            let url = '/api/teacher/students/all?';
+            if (searchValue) {
+                url += `search=${encodeURIComponent(searchValue)}&`;
+            }
+            if (classValue) {
+                url += `class=${encodeURIComponent(classValue)}&`;
+            }
+            
+            log(`📡 Fetching from: ${url}`);
+            
+            fetch(url)
+                .then(response => {
+                    log(`📊 Response status: ${response.status}`);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    log(`✅ Success! Loaded ${data.total} students`);
+                    
+                    studentSelect.innerHTML = '';
+                    
+                    if (data.success && data.students && data.students.length > 0) {
+                        data.students.forEach(student => {
+                            const option = document.createElement('option');
+                            option.value = student.student_id;
+                            option.textContent = `${student.name} - ${student.class} (${student.roll_no || student.student_id})`;
+                            studentSelect.appendChild(option);
+                        });
+                        
+                        const countInfo = document.createElement('option');
+                        countInfo.disabled = true;
+                        countInfo.textContent = `─── ${data.students.length} student(s) found ───`;
+                        studentSelect.insertBefore(countInfo, studentSelect.firstChild);
+                        
+                        log(`✨ Populated dropdown with ${data.students.length} students`);
+                    } else {
+                        const option = document.createElement('option');
+                        option.value = '';
+                        option.textContent = 'No students found';
+                        studentSelect.appendChild(option);
+                        log('⚠️ No students found');
+                    }
+                })
+                .catch(error => {
+                    log(`❌ ERROR: ${error.message}`);
+                    studentSelect.innerHTML = '<option value="">Error loading students</option>';
+                });
+        }
+        
+        // Load students on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🚀 Page loaded, initializing...');
+            loadAllStudents();
+            
+            document.getElementById('studentSearchInput').addEventListener('input', loadAllStudents);
+            document.getElementById('studentClassFilter').addEventListener('change', loadAllStudents);
+            
+            log('✅ Event listeners attached');
+        });
+    </script>
+</body>
+</html>
